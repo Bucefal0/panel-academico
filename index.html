@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>Panel Académico · Selección, Seguimiento y Evaluaciones</title>
+<title>Panel Académico · Selección, Preparación y Evaluaciones</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0d1b2e;--panel2:#12243b;--line:#233a56;
@@ -148,6 +148,48 @@ button{cursor:pointer}
 @media(max-width:950px){.eval-grid{grid-template-columns:1fr}.subject-cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.subject-cards{grid-template-columns:1fr}.eval-history-row{grid-template-columns:70px 1fr auto}}
 
+
+/* Índice de preparación y alertas */
+.prep-overview{display:grid;grid-template-columns:170px 1fr;gap:12px;margin:4px 0 14px}
+.prep-score{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:#0b192a;border:1px solid #2a4058;border-radius:14px;padding:14px}
+.prep-score .big{font-size:31px;font-weight:1000;line-height:1}
+.prep-score .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.65px;margin-top:6px}
+.prep-score .evidence{font-size:10px;color:#9fb0c7;margin-top:4px}
+.prep-profile{background:#0b192a;border:1px solid #2a4058;border-radius:14px;padding:13px 14px}
+.prep-profile .title{font-size:14px;font-weight:950}
+.prep-profile .desc{font-size:11px;color:#b9c8da;line-height:1.45;margin-top:5px}
+.prep-profile.good{border-color:rgba(85,217,145,.38)}
+.prep-profile.warn{border-color:rgba(255,202,98,.42)}
+.prep-profile.grow{border-color:rgba(85,166,255,.42)}
+.prep-profile.alert{border-color:rgba(255,124,124,.42)}
+.prep-profile.neutral{border-color:#36506c}
+.prep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.prep-stat{padding:16px}
+.prep-stat .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.prep-stat .value{font-size:27px;font-weight:1000;margin-top:4px}
+.prep-stat .sub{font-size:10px;color:#9fb0c7;margin-top:3px}
+.prep-rules{padding:17px;line-height:1.5}
+.prep-rules strong{color:#e7f1ff}
+.prep-table{min-width:1160px}
+.prep-value{font-size:13px;font-weight:950}
+.prep-mini{font-size:9px;color:var(--muted);margin-top:2px}
+.profile-pill{display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:850;border:1px solid #36506c;white-space:nowrap}
+.profile-pill.good{color:#aef0c7;border-color:rgba(85,217,145,.42);background:rgba(85,217,145,.08)}
+.profile-pill.warn{color:#ffe1a1;border-color:rgba(255,202,98,.42);background:rgba(255,202,98,.08)}
+.profile-pill.grow{color:#acd2ff;border-color:rgba(85,166,255,.42);background:rgba(85,166,255,.08)}
+.profile-pill.alert{color:#ffc0c0;border-color:rgba(255,124,124,.42);background:rgba(255,124,124,.08)}
+.profile-pill.neutral{color:#c2d0df;background:#0b192a}
+.prep-bar{width:110px;height:6px;border-radius:999px;background:#20344a;overflow:hidden;margin-top:5px}
+.prep-bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.prep-note{font-size:11px;color:#9fb0c7;padding:0 2px}
+@media(max-width:900px){
+  .prep-overview{grid-template-columns:1fr}
+  .prep-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .prep-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -167,7 +209,7 @@ button{cursor:pointer}
 <div class="app" id="appRoot" style="display:none">
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand"><div class="logo">Σ</div><div><h1>Panel de Selección Académica</h1><small>Terceros · Selección, seguimiento y evaluaciones</small></div></div>
+    <div class="brand"><div class="logo">Σ</div><div><h1>Panel de Selección Académica</h1><small>Terceros · Selección, preparación, seguimiento y evaluaciones</small></div></div>
     <div class="userbar">
       <div id="syncPill" class="sync-pill"><span class="sync-dot"></span><span id="syncText">Conectando…</span></div>
       <div id="userEmail" class="user-email"></div>
@@ -177,7 +219,7 @@ button{cursor:pointer}
 </header>
 
 <main class="shell">
-  <div class="banner"><strong>Ranking académico dinámico.</strong> El diagnóstico inicial cuenta como la primera evaluación de Matemáticas. Cada nueva evaluación académica actualiza el desempeño de su materia y el ranking general. El seguimiento cotidiano continúa separado y no modifica la clasificación.</div>
+  <div class="banner"><strong>Ranking académico dinámico.</strong> El diagnóstico inicial cuenta como la primera evaluación de Matemáticas. Cada nueva evaluación académica actualiza el desempeño de su materia y el ranking general. El seguimiento cotidiano continúa separado y no modifica la clasificación. Ahora se resume en un Índice de preparación independiente.</div>
 
   <nav class="tabs">
     <button class="tab active" data-view="inicio">Resumen</button>
@@ -186,6 +228,7 @@ button{cursor:pointer}
     <button class="tab" data-view="seleccion">Selección</button>
     <button class="tab" data-view="evaluaciones">Evaluaciones</button>
     <button class="tab" data-view="seguimiento">Seguimiento</button>
+    <button class="tab" data-view="preparacion">Preparación</button>
   </nav>
 
   <section id="inicio" class="view active">
@@ -244,6 +287,7 @@ button{cursor:pointer}
           <div class="section-title">
             <div><h2 style="font-size:17px">Seguimiento cotidiano</h2><p>No modifica el ranking académico; registra hábitos, cumplimiento y preparación.</p></div>
           </div>
+          <div id="studentPrepOverview" class="prep-overview"></div>
           <div id="studentTrackSummary" class="track-summary"></div>
 
           <div class="track-form">
@@ -325,6 +369,73 @@ button{cursor:pointer}
     </div>
   </section>
 
+
+
+
+  <section id="preparacion" class="view">
+    <div class="card controls">
+      <select class="select" id="prepScope">
+        <option value="TRACKED">Con seguimiento</option>
+        <option value="MARKED">Marcados por mí</option>
+        <option value="ALL">Todos los terceros</option>
+        <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
+      </select>
+      <select class="select" id="prepProfileFilter">
+        <option value="ALL">Todos los perfiles</option>
+        <option value="HIGH">Preparación alta</option>
+        <option value="GROW">Potencial / crecimiento</option>
+        <option value="ALERT">Alertas</option>
+      </select>
+      <select class="select" id="prepSort">
+        <option value="PREP">Ordenar por preparación</option>
+        <option value="ACADEMIC">Ordenar por índice académico</option>
+        <option value="TREND">Ordenar por mejora</option>
+      </select>
+      <input type="search" id="prepSearch" placeholder="Buscar alumno..." style="min-width:240px">
+    </div>
+
+    <div id="prepSummaryCards" class="prep-grid section"></div>
+
+    <div class="card prep-rules section">
+      <div class="section-title">
+        <div>
+          <h2>Lectura del Índice de preparación</h2>
+          <p>Es un indicador de hábitos y compromiso; nunca altera el ranking académico.</p>
+        </div>
+      </div>
+      <div class="tiny" style="font-size:12px;color:#c6d4e4">
+        <strong>Cálculo:</strong> cada registro de Tarea, Trabajo, Asistencia a preparación, Actividad terminada, Corrección de errores, Participación y Material cuenta por igual.
+        El índice es el porcentaje de respuestas positivas entre todos los criterios que sí fueron registrados.
+        <strong>Preparación alta:</strong> 80% o más.
+        <strong>Media:</strong> 60% a 79.9%.
+        <strong>Baja:</strong> menos de 60%.
+        Para asignar perfiles y alertas se requieren al menos <strong>5 registros</strong>; antes de eso aparecerá “Datos en construcción”.
+      </div>
+    </div>
+
+    <div class="prep-note section">La columna “Δ” compara la posición académica actual contra la posición del diagnóstico inicial. Preparación y ranking permanecen independientes.</div>
+
+    <div class="section table-wrap">
+      <table class="prep-table">
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Grupo</th>
+            <th>Rank acad.</th>
+            <th>Índice acad.</th>
+            <th>Δ</th>
+            <th>Preparación</th>
+            <th>Registros</th>
+            <th>Asistencia prep.</th>
+            <th>Corrigió errores</th>
+            <th>Perfil</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="prepBody"></tbody>
+      </table>
+    </div>
+  </section>
 
 
   <section id="evaluaciones" class="view">
@@ -416,7 +527,7 @@ button{cursor:pointer}
     </div>
   </section>
 
-  <div class="footer">Panel docente privado · Versión 4.1 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
+  <div class="footer">Panel docente privado · Versión 5 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
 </main>
 </div>
 
@@ -518,6 +629,7 @@ function refreshCloudDependentViews(){
   if(currentEvaluationId && !evalCaptureDirty) renderScoreCapture();
   renderTrackingTable();
   renderGroupFollowSummary();
+  renderPreparation();
 }
 async function saveStudentState(studentId){
   if(!currentUser) throw new Error("No hay una sesión activa.");
@@ -1026,6 +1138,176 @@ function setupEvaluationControls(){
   document.getElementById("saveScoresBottom")?.addEventListener("click",()=>saveEvaluationScores().catch(handleEvaluationError));
   document.addEventListener("click",e=>{const open=e.target.closest(".open-eval");if(open)openEvaluation(open.dataset.eval);const del=e.target.closest(".delete-eval");if(del)deleteEvaluation(del.dataset.eval).catch(handleEvaluationError);});
 }
+
+function preparationProfile(studentId){
+  const rows=sessionsForStudent(studentId);
+  let yes=0, recorded=0;
+  const byField={};
+  trackFields.forEach(([k])=>byField[k]={yes:0,recorded:0,pct:null});
+
+  let activeSessions=0;
+  rows.forEach(r=>{
+    let sessionHasRecord=false;
+    trackFields.forEach(([k])=>{
+      const v=r.entry[k];
+      if(v===1||v===0){
+        sessionHasRecord=true;
+        recorded++;
+        byField[k].recorded++;
+        if(v===1){yes++;byField[k].yes++;}
+      }
+    });
+    if(sessionHasRecord)activeSessions++;
+  });
+
+  Object.values(byField).forEach(x=>x.pct=x.recorded?x.yes/x.recorded*100:null);
+  const pct=recorded?yes/recorded*100:null;
+  return {pct,yes,recorded,sessions:activeSessions,byField};
+}
+function trendLabel(student){
+  const tr=trendForStudent(student);
+  if(tr.delta>=10)return {text:"↑ fuerte",cls:"trend-up"};
+  if(tr.delta>=3)return {text:"↑ positiva",cls:"trend-up"};
+  if(tr.delta<=-10)return {text:"↓ fuerte",cls:"trend-down"};
+  if(tr.delta<=-3)return {text:"↓ a vigilar",cls:"trend-down"};
+  return {text:"estable",cls:"trend-flat"};
+}
+function preparationBand(pct){
+  if(pct===null)return "NONE";
+  if(pct>=80)return "HIGH";
+  if(pct>=60)return "MID";
+  return "LOW";
+}
+function decisionProfile(student){
+  const acad=academicProfile(student).general;
+  const prep=preparationProfile(student.id);
+  const tr=trendForStudent(student);
+  if(prep.recorded<5 || prep.pct===null){
+    return {code:"BUILD",kind:"neutral",title:"⚪ Datos en construcción",desc:"Aún faltan registros de seguimiento para interpretar su preparación con confianza."};
+  }
+  if(acad>=80 && prep.pct>=80){
+    return {code:"STRONG",kind:"good",title:"🟢 Fuerte y constante",desc:"Combina rendimiento académico alto con preparación y constancia altas."};
+  }
+  if(acad>=80 && prep.pct<60){
+    return {code:"ALERT",kind:"warn",title:"🟡 Capacidad alta · constancia a vigilar",desc:"El rendimiento académico es alto, pero el seguimiento muestra baja preparación o cumplimiento."};
+  }
+  if(prep.pct>=80 && acad<80 && tr.delta>=3){
+    return {code:"GROW",kind:"grow",title:"🔵 En crecimiento · alta preparación",desc:"La preparación es alta y además ha mejorado su posición académica respecto al diagnóstico."};
+  }
+  if(prep.pct>=80 && acad<80){
+    return {code:"POTENTIAL",kind:"grow",title:"🔵 Preparación alta · potencial",desc:"Muestra muy buena preparación; conviene observar si esa constancia se transforma en mejores resultados académicos."};
+  }
+  if(acad<60 && prep.pct<60){
+    return {code:"ALERT",kind:"alert",title:"🔴 Requiere atención integral",desc:"Por ahora coinciden bajo rendimiento académico y baja preparación. Conviene revisar causas antes de decidir."};
+  }
+  if(tr.delta<=-10){
+    return {code:"ALERT",kind:"warn",title:"🟡 Descenso académico a vigilar",desc:"Su posición académica ha descendido de forma importante; conviene revisar las evaluaciones recientes."};
+  }
+  return {code:"OBSERVE",kind:"neutral",title:"⚪ Seguimiento necesario",desc:"No presenta una señal extrema; conviene seguir acumulando evidencia académica y de preparación."};
+}
+function renderStudentPreparationSummary(studentId){
+  const s=students.find(x=>x.id===studentId);
+  const el=document.getElementById("studentPrepOverview");
+  if(!s||!el)return;
+  const prep=preparationProfile(studentId);
+  const profile=decisionProfile(s);
+  const band=preparationBand(prep.pct);
+  const score=prep.pct===null?"—":prep.pct.toFixed(0)+"%";
+  const bandText=band==="HIGH"?"Preparación alta":band==="MID"?"Preparación media":band==="LOW"?"Preparación baja":"Sin datos";
+  el.innerHTML=`
+    <div class="prep-score">
+      <div class="big">${score}</div>
+      <div class="label">${bandText}</div>
+      <div class="evidence">${prep.recorded} registros · ${prep.sessions} sesiones</div>
+    </div>
+    <div class="prep-profile ${profile.kind}">
+      <div class="title">${profile.title}</div>
+      <div class="desc">${profile.desc}</div>
+      <div class="tiny" style="margin-top:7px">Este perfil es orientativo y no modifica la posición del alumno en el ranking.</div>
+    </div>`;
+}
+function preparationFilterMatch(student,filter){
+  const prep=preparationProfile(student.id);
+  const profile=decisionProfile(student);
+  if(filter==="HIGH")return prep.recorded>=5 && prep.pct>=80;
+  if(filter==="GROW")return profile.code==="GROW"||profile.code==="POTENTIAL";
+  if(filter==="ALERT")return profile.code==="ALERT";
+  return true;
+}
+function renderPreparation(){
+  const body=document.getElementById("prepBody");
+  if(!body)return;
+  const scope=document.getElementById("prepScope")?.value||"TRACKED";
+  const pf=document.getElementById("prepProfileFilter")?.value||"ALL";
+  const sort=document.getElementById("prepSort")?.value||"PREP";
+  const q=(document.getElementById("prepSearch")?.value||"").trim().toLowerCase();
+
+  let list=students.filter(s=>{
+    const prep=preparationProfile(s.id);
+    const scopeOk=
+      scope==="ALL" ? true :
+      scope==="TRACKED" ? prep.recorded>0 :
+      scope==="MARKED" ? Boolean(marks[s.id]) :
+      s.group===scope;
+    return scopeOk && preparationFilterMatch(s,pf) && (!q||s.name.toLowerCase().includes(q));
+  });
+
+  list.sort((a,b)=>{
+    const pa=preparationProfile(a.id),pb=preparationProfile(b.id);
+    const aa=academicProfile(a).general,ab=academicProfile(b).general;
+    const ta=trendForStudent(a).delta,tb=trendForStudent(b).delta;
+    if(sort==="ACADEMIC")return ab-aa || (pb.pct??-1)-(pa.pct??-1) || a.name.localeCompare(b.name,"es");
+    if(sort==="TREND")return tb-ta || ab-aa || a.name.localeCompare(b.name,"es");
+    return (pb.pct??-1)-(pa.pct??-1) || pb.recorded-pa.recorded || ab-aa || a.name.localeCompare(b.name,"es");
+  });
+
+  const rmap=currentRankMap();
+  body.innerHTML=list.map(s=>{
+    const prep=preparationProfile(s.id);
+    const p=academicProfile(s);
+    const tr=trendForStudent(s);
+    const profile=decisionProfile(s);
+    const att=prep.byField.prep;
+    const corr=prep.byField.corrected;
+    const mark=marks[s.id]||"";
+    const prepText=prep.pct===null?"—":prep.pct.toFixed(1)+"%";
+    const width=prep.pct===null?0:Math.max(0,Math.min(100,prep.pct));
+    return `<tr class="clickable" data-open="${s.id}">
+      <td><strong>${esc(shortName(s.name))}</strong></td>
+      <td>${s.group}</td>
+      <td class="num">#${rmap[s.id]}</td>
+      <td class="num">${p.general.toFixed(1)}%</td>
+      <td class="num ${tr.cls}">${tr.text}</td>
+      <td><div class="prep-value">${prepText}</div><div class="prep-bar"><span style="width:${width}%"></span></div></td>
+      <td class="num">${prep.recorded}<div class="prep-mini">${prep.sessions} sesiones</div></td>
+      <td class="num">${att.recorded?`${att.yes}/${att.recorded}`:"—"}</td>
+      <td class="num">${corr.recorded?`${corr.yes}/${corr.recorded}`:"—"}</td>
+      <td><span class="profile-pill ${profile.kind}">${profile.title}</span></td>
+      <td>${mark?`<span class="status-dot ${markClass(mark)}"></span>${esc(mark)}`:"—"}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="11" class="empty">No hay alumnos que coincidan con este filtro.</td></tr>`;
+
+  renderPreparationSummary();
+}
+function renderPreparationSummary(){
+  const el=document.getElementById("prepSummaryCards");
+  if(!el)return;
+  const profiles=students.map(s=>({s,prep:preparationProfile(s.id),profile:decisionProfile(s),acad:academicProfile(s).general,tr:trendForStudent(s)}));
+  const withData=profiles.filter(x=>x.prep.recorded>0).length;
+  const high=profiles.filter(x=>x.prep.recorded>=5 && x.prep.pct>=80).length;
+  const grow=profiles.filter(x=>x.profile.code==="GROW"||x.profile.code==="POTENTIAL").length;
+  const alert=profiles.filter(x=>x.profile.code==="ALERT").length;
+  el.innerHTML=`
+    <div class="card prep-stat"><div class="label">Con seguimiento</div><div class="value">${withData}</div><div class="sub">Alumnos con al menos un criterio registrado</div></div>
+    <div class="card prep-stat"><div class="label">Preparación alta</div><div class="value">${high}</div><div class="sub">≥ 80% y mínimo 5 registros</div></div>
+    <div class="card prep-stat"><div class="label">Potencial / crecimiento</div><div class="value">${grow}</div><div class="sub">Constancia alta con margen académico</div></div>
+    <div class="card prep-stat"><div class="label">Alertas</div><div class="value">${alert}</div><div class="sub">Casos que conviene revisar con mayor atención</div></div>`;
+}
+function setupPreparationControls(){
+  ["prepScope","prepProfileFilter","prepSort"].forEach(id=>document.getElementById(id)?.addEventListener("change",renderPreparation));
+  document.getElementById("prepSearch")?.addEventListener("input",renderPreparation);
+}
+
 function trendForStudent(s){
   const current=currentRankMap()[s.id];const initial=initialRankMap[s.id];if(!current||!initial)return {delta:0,text:"—",cls:"trend-flat"};const delta=initial-current;return {delta,text:delta>0?`↑ ${delta}`:delta<0?`↓ ${Math.abs(delta)}`:"=",cls:delta>0?"trend-up":delta<0?"trend-down":"trend-flat"};
 }
@@ -1111,6 +1393,7 @@ function renderStudent(id){
   document.getElementById("saveMsg").textContent="";
   renderStudentAcademic(s.id);
   renderIndividualTracking(s.id);
+  renderStudentPreparationSummary(s.id);
 }
 function currentStudent(){
   return students.find(s=>s.id===document.getElementById("studentSelect").value);
@@ -1190,7 +1473,7 @@ document.getElementById("rankSearch").oninput=renderRanking;
 
 function renderSelection(){
   const rank=currentGenRank();const rmap=currentRankMap();
-  const row=s=>{const p=academicProfile(s);return `<div class="selrow clickable" data-open="${s.id}"><div class="p">#${rmap[s.id]}</div><div><div class="n">${esc(shortName(s.name))}</div><div class="g">${s.group} · ${p.coverage}/5 materias</div></div><div class="s">${p.general.toFixed(1)}%</div></div>`}
+  const row=s=>{const p=academicProfile(s),prep=preparationProfile(s.id);return `<div class="selrow clickable" data-open="${s.id}"><div class="p">#${rmap[s.id]}</div><div><div class="n">${esc(shortName(s.name))}</div><div class="g">${s.group} · ${p.coverage}/5 materias · Prep. ${prep.pct===null?"—":prep.pct.toFixed(0)+"%"}</div></div><div class="s">${p.general.toFixed(1)}%</div></div>`}
   document.getElementById("autoTop").innerHTML=rank.slice(0,5).map(row).join("");
   document.getElementById("autoReserve").innerHTML=rank.slice(5,8).map(row).join("");
   const picked=rank.filter(s=>marks[s.id]);
@@ -1200,8 +1483,8 @@ function renderSelection(){
 }
 document.getElementById("exportCsv").onclick=()=>{
   const rank=currentGenRank(),rmap=currentRankMap();
-  const rows=[["Posicion actual","Posicion inicial","Alumno","Grupo","Indice general","Cobertura materias","Diagnostico","Matematicas","Quimica","Fisica","Biologia","Espanol","Estado"]];
-  rank.forEach(s=>{const p=academicProfile(s);rows.push([rmap[s.id],initialRankMap[s.id],s.name,s.group,p.general.toFixed(1),p.coverage,stats(s).pct.toFixed(1),...subjects.map(sub=>p.bySubject[sub]===null?"":p.bySubject[sub].toFixed(1)),marks[s.id]||""]);});
+  const rows=[["Posicion actual","Posicion inicial","Alumno","Grupo","Indice general","Cobertura materias","Diagnostico","Matematicas","Quimica","Fisica","Biologia","Espanol","Indice preparacion","Registros seguimiento","Sesiones seguimiento","Perfil preparacion","Estado"]];
+  rank.forEach(s=>{const p=academicProfile(s),prep=preparationProfile(s.id),prof=decisionProfile(s);rows.push([rmap[s.id],initialRankMap[s.id],s.name,s.group,p.general.toFixed(1),p.coverage,stats(s).pct.toFixed(1),...subjects.map(sub=>p.bySubject[sub]===null?"":p.bySubject[sub].toFixed(1)),prep.pct===null?"":prep.pct.toFixed(1),prep.recorded,prep.sessions,prof.title,marks[s.id]||""]);});
   const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
   const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ranking_academico_terceros.csv";a.click();URL.revokeObjectURL(a.href);
 };
@@ -1213,6 +1496,7 @@ function showView(id){
   if(id==="seleccion")renderSelection();
   if(id==="evaluaciones"){renderEvaluationList();renderEvalStats();}
   if(id==="seguimiento"){renderTrackingTable();renderGroupFollowSummary();}
+  if(id==="preparacion")renderPreparation();
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
 document.addEventListener("click",e=>{
@@ -1279,12 +1563,14 @@ onAuthStateChanged(auth,async(user)=>{
       setupStudentSelectors();
       setupTrackingControls();
       setupEvaluationControls();
+      setupPreparationControls();
       renderEvaluationList();
       renderEvalStats();
       renderRanking();
       renderSelection();
       renderTrackingTable();
       renderGroupFollowSummary();
+      renderPreparation();
       appInitialized=true;
     }else{
       refreshCloudDependentViews();
