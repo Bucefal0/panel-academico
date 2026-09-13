@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>Panel de Selección Académica · Sincronizado</title>
+<title>Panel Académico · Selección y Seguimiento</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0d1b2e;--panel2:#12243b;--line:#233a56;
@@ -84,6 +84,51 @@ button{cursor:pointer}
 .sync-pill.error .sync-dot{background:#ff7c7c}
 .logout-btn{border:1px solid #35516f;background:#0b192a;color:#d5e0ec;border-radius:9px;padding:6px 9px;font-size:11px;font-weight:800}
 
+
+/* Seguimiento cotidiano */
+.track-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.track-metric{background:#0b192a;border:1px solid #2a4058;border-radius:12px;padding:12px}
+.track-metric .tm-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.track-metric .tm-value{font-size:20px;font-weight:950;margin-top:3px}
+.track-metric .tm-sub{font-size:10px;color:#9fb0c7;margin-top:2px}
+.track-form{margin-top:15px;padding-top:15px;border-top:1px solid rgba(255,255,255,.08)}
+.track-form-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+.track-date{background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:10px;padding:8px 10px}
+.track-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.track-item{background:#0b192a;border:1px solid #2a4058;border-radius:11px;padding:9px}
+.track-item span{display:block;font-size:10px;color:#b8c8db;margin-bottom:7px;line-height:1.25}
+.tri-btn{width:100%;border:1px solid #3a5068;background:#112136;color:#9fb0c7;border-radius:9px;padding:7px 5px;font-size:12px;font-weight:900}
+.tri-btn.yes{background:rgba(85,217,145,.14);border-color:rgba(85,217,145,.55);color:#aef0c7}
+.tri-btn.no{background:rgba(255,124,124,.13);border-color:rgba(255,124,124,.5);color:#ffc2c2}
+.track-history{margin-top:14px}
+.hist-row{padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}
+.hist-row:first-child{border-top:0}
+.hist-date{font-size:11px;color:var(--cyan);font-weight:850;margin-bottom:5px}
+.hist-icons{display:flex;flex-wrap:wrap;gap:5px}
+.hist-tag{font-size:10px;border-radius:999px;padding:4px 7px;border:1px solid #324b66;color:#b9c9dd}
+.hist-tag.y{border-color:rgba(85,217,145,.35);color:#aef0c7}
+.hist-tag.n{border-color:rgba(255,124,124,.35);color:#ffc2c2}
+.hist-note{font-size:11px;color:#c6d3e2;margin-top:6px;line-height:1.4}
+.follow-layout{display:grid;grid-template-columns:1fr;gap:16px}
+.follow-info{padding:16px}
+.follow-table{min-width:1220px}
+.follow-table th,.follow-table td{padding:8px 7px}
+.follow-table td:first-child{min-width:250px}
+.follow-table .tri-btn{min-width:44px;padding:6px 4px}
+.follow-note{width:190px;background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:8px;padding:7px 8px;font-size:11px}
+.follow-savebar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:14px 16px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.legend b{color:#d8e5f3}
+.follow-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.follow-summary .stat{box-shadow:none}
+@media(max-width:900px){
+  .track-summary,.follow-summary{grid-template-columns:repeat(2,1fr)}
+  .track-checks{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .track-summary,.follow-summary,.track-checks{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -113,13 +158,14 @@ button{cursor:pointer}
 </header>
 
 <main class="shell">
-  <div class="banner"><strong>Ranking provisional.</strong> En esta primera versión el orden se basa únicamente en el diagnóstico inicial de Matemáticas. Las evaluaciones de Química, Física, Biología, Español y los simulacros se incorporarán después.</div>
+  <div class="banner"><strong>Ranking provisional.</strong> En esta primera versión el orden se basa únicamente en el diagnóstico inicial de Matemáticas. Las evaluaciones de Química, Física, Biología, Español y los simulacros se incorporarán después. El seguimiento cotidiano se registra aparte y no altera este ranking.</div>
 
   <nav class="tabs">
     <button class="tab active" data-view="inicio">Resumen</button>
     <button class="tab" data-view="alumno">Alumno</button>
     <button class="tab" data-view="ranking">Ranking</button>
     <button class="tab" data-view="seleccion">Selección</button>
+    <button class="tab" data-view="seguimiento">Seguimiento</button>
   </nav>
 
   <section id="inicio" class="view active">
@@ -165,6 +211,32 @@ button{cursor:pointer}
           <div class="card box"><h3>Aprendizajes por reforzar</h3><div class="chips" id="weaknesses"></div><div id="pendingWrap" style="margin-top:9px"></div></div>
         </div>
         <div class="card box section"><h3>Detalle de los 12 reactivos</h3><div class="reactivos" id="reactivos"></div></div>
+        <div class="card box section">
+          <div class="section-title">
+            <div><h2 style="font-size:17px">Seguimiento cotidiano</h2><p>No modifica el ranking académico; registra hábitos, cumplimiento y preparación.</p></div>
+          </div>
+          <div id="studentTrackSummary" class="track-summary"></div>
+
+          <div class="track-form">
+            <div class="track-form-head">
+              <strong>Registro rápido</strong>
+              <input id="individualTrackDate" class="track-date" type="date">
+            </div>
+            <div id="individualTrackChecks" class="track-checks"></div>
+            <textarea id="individualTrackNote" class="note" style="min-height:72px" placeholder="Observación de esta fecha (opcional)"></textarea>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+              <button id="saveIndividualTrack" class="primary" type="button">Guardar seguimiento</button>
+              <button id="clearIndividualTrack" class="secondary" type="button">Limpiar registro</button>
+              <span id="individualTrackMsg" class="tiny"></span>
+            </div>
+          </div>
+
+          <div class="track-history">
+            <h3 style="font-size:14px;margin:0 0 6px">Historial reciente</h3>
+            <div id="studentTrackHistory"></div>
+          </div>
+        </div>
+
       </div>
       <aside class="card action-panel">
         <h3>Decisión docente</h3>
@@ -215,7 +287,61 @@ button{cursor:pointer}
     </div>
   </section>
 
-  <div class="footer">Panel docente privado · Versión 2 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
+
+  <section id="seguimiento" class="view">
+    <div class="card controls">
+      <select class="select" id="trackingGroup">
+        <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
+      </select>
+      <input class="track-date" id="trackingDate" type="date">
+      <button class="secondary" id="trackingToday" type="button">Hoy</button>
+      <button class="primary" id="saveGroupTracking" type="button">Guardar grupo</button>
+    </div>
+
+    <div class="card follow-info section">
+      <div class="section-title">
+        <div>
+          <h2>Registro rápido de grupo</h2>
+          <p>Haz clic en cada casilla: <b>—</b> → <b>✓ Sí</b> → <b>✕ No</b> → <b>—</b>. El guion significa “sin registrar”.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <span><b>✓ Sí</b> = cumplió / entregó / asistió</span>
+        <span><b>✕ No</b> = no cumplió / no entregó / no asistió</span>
+        <span><b>—</b> = no fue evaluado ese día</span>
+      </div>
+      <div id="groupFollowSummary" class="follow-summary"></div>
+    </div>
+
+    <div class="section table-wrap">
+      <table class="follow-table">
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Tarea</th>
+            <th>Trabajo</th>
+            <th>Prep.</th>
+            <th>Terminó</th>
+            <th>Corrigió</th>
+            <th>Participó</th>
+            <th>Material</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody id="trackingBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card follow-savebar">
+      <div>
+        <strong id="groupSaveTitle">Sin cambios pendientes</strong>
+        <div id="groupSaveMsg" class="tiny">Los registros se guardan en Firestore y aparecerán automáticamente en tus otros dispositivos.</div>
+      </div>
+      <button class="primary" id="saveGroupTrackingBottom" type="button">Guardar grupo</button>
+    </div>
+  </section>
+
+  <div class="footer">Panel docente privado · Versión 3 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
 </main>
 </div>
 
@@ -227,7 +353,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDocs, setDoc, serverTimestamp,
-  onSnapshot, writeBatch
+  onSnapshot, writeBatch, runTransaction, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -255,7 +381,39 @@ let marks = {};
 let notes = {};
 let currentUser = null;
 let unsubscribeCloud = null;
+let unsubscribeTracking = null;
 let appInitialized = false;
+let trackingSessions = {};
+let trackingDirty = false;
+
+const trackFields = [
+  ["task","Tarea entregada"],
+  ["work","Trabajo entregado"],
+  ["prep","Asistió a preparación"],
+  ["finished","Terminó actividad"],
+  ["corrected","Corrigió errores"],
+  ["participation","Participó"],
+  ["material","Trajo material"]
+];
+
+function localDateISO(){
+  const d=new Date();
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function sessionId(date,group){ return `${date}_${group}`; }
+function emptyTrackEntry(){
+  return {task:null,work:null,prep:null,finished:null,corrected:null,participation:null,material:null,note:""};
+}
+function normalizeTrackEntry(x={}){
+  const e=emptyTrackEntry();
+  trackFields.forEach(([k])=>{ e[k]=(x[k]===true||x[k]===1)?1:(x[k]===false||x[k]===0)?0:null; });
+  e.note=typeof x.note==="string"?x.note:"";
+  return e;
+}
+function hasTrackData(e){
+  return trackFields.some(([k])=>e[k]===1||e[k]===0) || Boolean((e.note||"").trim());
+}
 
 function setSyncStatus(message, kind="ok"){
   const pill=document.getElementById("syncPill");
@@ -275,6 +433,8 @@ function refreshCloudDependentViews(){
   if(s) renderStudent(s.id);
   renderRanking();
   renderSelection();
+  renderTrackingTable();
+  renderGroupFollowSummary();
 }
 async function saveStudentState(studentId){
   if(!currentUser) throw new Error("No hay una sesión activa.");
@@ -287,6 +447,58 @@ async function saveStudentState(studentId){
   persistLocalCache();
   setSyncStatus("Sincronizado");
 }
+
+async function loadTrackingSessions(user){
+  const ref=collection(firestore,"users",user.uid,"trackingSessions");
+  const initial=await getDocs(ref);
+  trackingSessions={};
+  initial.forEach(d=>trackingSessions[d.id]=d.data());
+
+  if(unsubscribeTracking) unsubscribeTracking();
+  unsubscribeTracking=onSnapshot(ref,snap=>{
+    const next={};
+    snap.forEach(d=>next[d.id]=d.data());
+    trackingSessions=next;
+    if(!trackingDirty){
+      renderTrackingTable();
+      renderGroupFollowSummary();
+    }
+    const s=currentStudent();
+    if(s) renderIndividualTracking(s.id);
+  },err=>{
+    console.error(err);
+    setSyncStatus("Error en seguimiento","error");
+  });
+}
+
+function trackEntryFor(studentId,date){
+  const s=students.find(x=>x.id===studentId);
+  if(!s)return emptyTrackEntry();
+  const session=trackingSessions[sessionId(date,s.group)];
+  return normalizeTrackEntry(session?.entries?.[studentId] || {});
+}
+function sessionsForStudent(studentId){
+  const s=students.find(x=>x.id===studentId);
+  if(!s)return [];
+  return Object.values(trackingSessions)
+    .filter(sess=>sess.group===s.group && sess.entries && sess.entries[studentId] && hasTrackData(normalizeTrackEntry(sess.entries[studentId])))
+    .map(sess=>({date:sess.date,entry:normalizeTrackEntry(sess.entries[studentId])}))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+}
+function followSummary(studentId){
+  const rows=sessionsForStudent(studentId);
+  const out={};
+  trackFields.forEach(([k])=>{
+    let yes=0, recorded=0;
+    rows.forEach(r=>{
+      const v=r.entry[k];
+      if(v===1||v===0){recorded++; if(v===1)yes++;}
+    });
+    out[k]={yes,recorded,pct:recorded?yes/recorded*100:null};
+  });
+  return out;
+}
+
 async function loadCloudState(user){
   const ref=collection(firestore,"users",user.uid,"studentState");
   const initial=await getDocs(ref);
@@ -360,6 +572,216 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function shortName(n){return n.replace(" * "," · ")}
 function markClass(m){return m==="Seleccionado"?"sel":m==="Candidato"?"can":m==="Reserva"?"res":m==="Observación"?"obs":""}
 function areaLabel(v){return `${v}/4 · ${Math.round(v/4*100)}%`}
+
+
+function triText(v){ return v===1?"✓ Sí":v===0?"✕ No":"—"; }
+function applyTriButton(btn,v){
+  btn.dataset.value = v===1?"1":v===0?"0":"";
+  btn.textContent=triText(v);
+  btn.classList.toggle("yes",v===1);
+  btn.classList.toggle("no",v===0);
+}
+function cycleTri(btn){
+  const raw=btn.dataset.value;
+  const next=raw===""?1:raw==="1"?0:null;
+  applyTriButton(btn,next);
+  return next;
+}
+function formatTrackDate(iso){
+  if(!iso)return "";
+  const d=new Date(iso+"T12:00:00");
+  return d.toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"});
+}
+function summaryMetricHTML(label,x){
+  const value=x.recorded?`${x.yes}/${x.recorded}`:"—";
+  const sub=x.recorded?`${Math.round(x.pct)}% de cumplimiento`:"Sin registros";
+  return `<div class="track-metric"><div class="tm-label">${esc(label)}</div><div class="tm-value">${value}</div><div class="tm-sub">${sub}</div></div>`;
+}
+function renderIndividualTracking(studentId){
+  const summary=followSummary(studentId);
+  const important=[
+    ["task","Tareas"],["work","Trabajos"],["prep","Asistencia prep."],["finished","Actividades"]
+  ];
+  const sumEl=document.getElementById("studentTrackSummary");
+  if(sumEl) sumEl.innerHTML=important.map(([k,l])=>summaryMetricHTML(l,summary[k])).join("");
+
+  const dateEl=document.getElementById("individualTrackDate");
+  if(dateEl && !dateEl.value) dateEl.value=localDateISO();
+  const date=dateEl?.value || localDateISO();
+  const entry=trackEntryFor(studentId,date);
+
+  const checks=document.getElementById("individualTrackChecks");
+  if(checks){
+    checks.innerHTML=trackFields.map(([k,label])=>`
+      <div class="track-item">
+        <span>${esc(label)}</span>
+        <button type="button" class="tri-btn individual-tri" data-key="${k}"></button>
+      </div>`).join("");
+    checks.querySelectorAll(".individual-tri").forEach(btn=>applyTriButton(btn,entry[btn.dataset.key]));
+  }
+  const note=document.getElementById("individualTrackNote");
+  if(note) note.value=entry.note||"";
+
+  const history=sessionsForStudent(studentId).slice(0,10);
+  const hist=document.getElementById("studentTrackHistory");
+  if(hist){
+    hist.innerHTML=history.length?history.map(r=>{
+      const tags=trackFields.filter(([k])=>r.entry[k]===1||r.entry[k]===0).map(([k,label])=>
+        `<span class="hist-tag ${r.entry[k]===1?"y":"n"}">${r.entry[k]===1?"✓":"✕"} ${esc(label.replace(" entregada","").replace(" entregado",""))}</span>`
+      ).join("");
+      return `<div class="hist-row"><div class="hist-date">${formatTrackDate(r.date)}</div><div class="hist-icons">${tags}</div>${r.entry.note?`<div class="hist-note">${esc(r.entry.note)}</div>`:""}</div>`;
+    }).join(""):`<div class="empty">Todavía no hay registros de seguimiento para este alumno.</div>`;
+  }
+}
+function readIndividualTrackForm(){
+  const e=emptyTrackEntry();
+  document.querySelectorAll("#individualTrackChecks .individual-tri").forEach(btn=>{
+    const raw=btn.dataset.value;
+    e[btn.dataset.key]=raw==="1"?1:raw==="0"?0:null;
+  });
+  e.note=(document.getElementById("individualTrackNote")?.value||"").trim();
+  return e;
+}
+async function saveIndividualTracking(){
+  const s=currentStudent(); if(!s||!currentUser)return;
+  const date=document.getElementById("individualTrackDate").value || localDateISO();
+  const entry=readIndividualTrackForm();
+  const ref=doc(firestore,"users",currentUser.uid,"trackingSessions",sessionId(date,s.group));
+  setSyncStatus("Guardando seguimiento…","busy");
+  document.getElementById("individualTrackMsg").textContent="Guardando…";
+
+  await runTransaction(firestore,async(tx)=>{
+    const snap=await tx.get(ref);
+    const base=snap.exists()?snap.data():{date,group:s.group,entries:{}};
+    const entries={...(base.entries||{})};
+    if(hasTrackData(entry)) entries[s.id]=entry; else delete entries[s.id];
+    if(Object.keys(entries).length){
+      tx.set(ref,{date,group:s.group,entries,updatedAt:serverTimestamp()},{merge:true});
+    }else if(snap.exists()){
+      tx.delete(ref);
+    }
+  });
+  document.getElementById("individualTrackMsg").textContent="Seguimiento guardado y sincronizado.";
+  setSyncStatus("Sincronizado");
+}
+
+function renderTrackingTable(){
+  const body=document.getElementById("trackingBody");
+  if(!body)return;
+  const group=document.getElementById("trackingGroup")?.value || "3A";
+  const date=document.getElementById("trackingDate")?.value || localDateISO();
+  const session=trackingSessions[sessionId(date,group)];
+  const entries=session?.entries || {};
+  const list=students.filter(s=>s.group===group).sort((a,b)=>a.name.localeCompare(b.name,"es"));
+
+  body.innerHTML=list.map(s=>{
+    const e=normalizeTrackEntry(entries[s.id]||{});
+    return `<tr data-track-student="${s.id}">
+      <td class="clickable" data-open="${s.id}"><strong>${esc(shortName(s.name))}</strong></td>
+      ${trackFields.map(([k])=>`<td class="num"><button type="button" class="tri-btn group-tri" data-key="${k}"></button></td>`).join("")}
+      <td><input class="follow-note" value="${esc(e.note)}" placeholder="Opcional"></td>
+    </tr>`;
+  }).join("");
+
+  body.querySelectorAll("tr[data-track-student]").forEach(tr=>{
+    const e=normalizeTrackEntry(entries[tr.dataset.trackStudent]||{});
+    tr.querySelectorAll(".group-tri").forEach(btn=>applyTriButton(btn,e[btn.dataset.key]));
+  });
+  trackingDirty=false;
+  updateDirtyLabel();
+}
+function renderGroupFollowSummary(){
+  const el=document.getElementById("groupFollowSummary");
+  if(!el)return;
+  const group=document.getElementById("trackingGroup")?.value || "3A";
+  const groupStudents=students.filter(s=>s.group===group);
+  const agg={};
+  ["task","work","prep","participation"].forEach(k=>agg[k]={yes:0,recorded:0,pct:null});
+  groupStudents.forEach(s=>{
+    const sm=followSummary(s.id);
+    Object.keys(agg).forEach(k=>{
+      agg[k].yes+=sm[k].yes; agg[k].recorded+=sm[k].recorded;
+    });
+  });
+  Object.values(agg).forEach(x=>x.pct=x.recorded?x.yes/x.recorded*100:null);
+  el.innerHTML=[
+    ["Tareas",agg.task],["Trabajos",agg.work],["Asistencia prep.",agg.prep],["Participación",agg.participation]
+  ].map(([l,x])=>summaryMetricHTML(l,x)).join("");
+}
+function updateDirtyLabel(){
+  const title=document.getElementById("groupSaveTitle");
+  if(title) title.textContent=trackingDirty?"Cambios pendientes de guardar":"Sin cambios pendientes";
+}
+async function saveGroupTracking(){
+  if(!currentUser)return;
+  const group=document.getElementById("trackingGroup").value;
+  const date=document.getElementById("trackingDate").value || localDateISO();
+  const entries={};
+  document.querySelectorAll("#trackingBody tr[data-track-student]").forEach(tr=>{
+    const e=emptyTrackEntry();
+    tr.querySelectorAll(".group-tri").forEach(btn=>{
+      const raw=btn.dataset.value;
+      e[btn.dataset.key]=raw==="1"?1:raw==="0"?0:null;
+    });
+    e.note=(tr.querySelector(".follow-note")?.value||"").trim();
+    if(hasTrackData(e)) entries[tr.dataset.trackStudent]=e;
+  });
+
+  const ref=doc(firestore,"users",currentUser.uid,"trackingSessions",sessionId(date,group));
+  const msg=document.getElementById("groupSaveMsg");
+  setSyncStatus("Guardando grupo…","busy");
+  if(msg) msg.textContent="Guardando en Firestore…";
+
+  if(Object.keys(entries).length){
+    await setDoc(ref,{date,group,entries,updatedAt:serverTimestamp()});
+  }else{
+    await deleteDoc(ref).catch(()=>{});
+  }
+  trackingDirty=false;
+  updateDirtyLabel();
+  if(msg) msg.textContent=`Guardado: ${group} · ${formatTrackDate(date)}. Sincronizado con tus otros dispositivos.`;
+  setSyncStatus("Sincronizado");
+}
+function setupTrackingControls(){
+  const g=document.getElementById("trackingGroup");
+  const d=document.getElementById("trackingDate");
+  const id=document.getElementById("individualTrackDate");
+  if(d && !d.value)d.value=localDateISO();
+  if(id && !id.value)id.value=localDateISO();
+
+  g?.addEventListener("change",()=>{trackingDirty=false;renderTrackingTable();renderGroupFollowSummary();});
+  d?.addEventListener("change",()=>{trackingDirty=false;renderTrackingTable();});
+  document.getElementById("trackingToday")?.addEventListener("click",()=>{d.value=localDateISO();trackingDirty=false;renderTrackingTable();});
+  document.getElementById("saveGroupTracking")?.addEventListener("click",()=>saveGroupTracking().catch(handleTrackingError));
+  document.getElementById("saveGroupTrackingBottom")?.addEventListener("click",()=>saveGroupTracking().catch(handleTrackingError));
+  document.getElementById("saveIndividualTrack")?.addEventListener("click",()=>saveIndividualTracking().catch(handleTrackingError));
+  document.getElementById("clearIndividualTrack")?.addEventListener("click",()=>{
+    document.querySelectorAll("#individualTrackChecks .individual-tri").forEach(b=>applyTriButton(b,null));
+    document.getElementById("individualTrackNote").value="";
+    document.getElementById("individualTrackMsg").textContent="Registro limpio. Pulsa Guardar seguimiento para eliminarlo de esa fecha.";
+  });
+  id?.addEventListener("change",()=>{const s=currentStudent();if(s)renderIndividualTracking(s.id);});
+
+  document.addEventListener("click",e=>{
+    const tri=e.target.closest(".tri-btn");
+    if(!tri)return;
+    cycleTri(tri);
+    if(tri.classList.contains("group-tri")){
+      trackingDirty=true;updateDirtyLabel();
+    }
+  });
+  document.addEventListener("input",e=>{
+    if(e.target.matches("#trackingBody .follow-note")){trackingDirty=true;updateDirtyLabel();}
+  });
+}
+function handleTrackingError(err){
+  console.error(err);
+  setSyncStatus("Error al guardar","error");
+  const gm=document.getElementById("groupSaveMsg");
+  const im=document.getElementById("individualTrackMsg");
+  if(gm)gm.textContent="No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.";
+  if(im)im.textContent="No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.";
+}
 
 function renderHome(){
   const ss=students.map(stats);
@@ -439,6 +861,7 @@ function renderStudent(id){
   document.querySelectorAll(".statusbtn").forEach(b=>b.classList.toggle("active",marks[s.id]===b.dataset.status));
   document.getElementById("studentNote").value=notes[s.id]||"";
   document.getElementById("saveMsg").textContent="";
+  renderIndividualTracking(s.id);
 }
 function currentStudent(){
   return students.find(s=>s.id===document.getElementById("studentSelect").value);
@@ -544,6 +967,7 @@ function showView(id){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===id));
   if(id==="ranking")renderRanking();
   if(id==="seleccion")renderSelection();
+  if(id==="seguimiento"){renderTrackingTable();renderGroupFollowSummary();}
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
 document.addEventListener("click",e=>{
@@ -582,6 +1006,8 @@ onAuthStateChanged(auth,async(user)=>{
   if(!user){
     currentUser=null;
     if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null;}
+    if(unsubscribeTracking){unsubscribeTracking();unsubscribeTracking=null;}
+    trackingSessions={};
     document.getElementById("appRoot").style.display="none";
     document.getElementById("authGate").style.display="grid";
     document.getElementById("loginPassword").value="";
@@ -601,12 +1027,15 @@ onAuthStateChanged(auth,async(user)=>{
   setSyncStatus("Cargando…","busy");
 
   try{
-    await loadCloudState(user);
+    await Promise.all([loadCloudState(user),loadTrackingSessions(user)]);
     if(!appInitialized){
       renderHome();
       setupStudentSelectors();
+      setupTrackingControls();
       renderRanking();
       renderSelection();
+      renderTrackingTable();
+      renderGroupFollowSummary();
       appInitialized=true;
     }else{
       refreshCloudDependentViews();
