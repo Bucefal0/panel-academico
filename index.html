@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>Panel de Selección Académica · Sincronizado</title>
+<style>
+:root{
+  --bg:#07111f;--panel:#0d1b2e;--panel2:#12243b;--line:#233a56;
+  --text:#edf4ff;--muted:#9fb0c7;--blue:#55a6ff;--cyan:#4ed9d1;
+  --green:#55d991;--amber:#ffca62;--red:#ff7c7c;--purple:#b797ff;
+  --shadow:0 18px 50px rgba(0,0,0,.28);--radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#07111f 0,#091726 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,select,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(7,17,31,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.07)}
+.topbar-inner{max-width:1440px;margin:auto;padding:16px 22px;display:flex;align-items:center;gap:16px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#3d8cff,#4ed9d1);font-weight:900;color:#05111e;box-shadow:0 10px 26px rgba(78,217,209,.18)}
+.brand h1{font-size:18px;margin:0;letter-spacing:.1px}.brand small{display:block;color:var(--muted);margin-top:2px}
+.version{padding:7px 10px;border:1px solid #335172;border-radius:999px;color:#bbcee3;font-size:12px}
+.shell{max-width:1440px;margin:auto;padding:24px 22px 60px}
+.banner{border:1px solid rgba(255,202,98,.35);background:rgba(255,202,98,.08);border-radius:15px;padding:13px 15px;color:#ffe3aa;margin-bottom:18px;font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.tab{border:1px solid var(--line);background:#0b1829;color:#b9c9dd;padding:10px 14px;border-radius:12px;font-weight:700}
+.tab.active{background:#173251;color:#fff;border-color:#3e6b99}
+.view{display:none}.view.active{display:block}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:linear-gradient(180deg,rgba(18,36,59,.94),rgba(13,27,46,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat{padding:18px}.stat .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.stat .num{font-size:30px;font-weight:900;margin-top:5px}.stat .sub{font-size:12px;color:#b8c6d8;margin-top:4px}
+.section{margin-top:20px}.section-title{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 11px}.section-title h2{margin:0;font-size:20px}.section-title p{margin:0;color:var(--muted);font-size:13px}
+.top5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.rank-card{padding:16px;min-height:155px;position:relative;overflow:hidden}
+.rank-card:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(85,166,255,.08);right:-25px;top:-25px}
+.medal{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:800}.rank-card .place{font-size:28px;font-weight:1000;color:var(--amber);margin:3px 0 9px}.rank-card .nm{font-size:13px;font-weight:850;line-height:1.35}.rank-card .grp{font-size:12px;color:var(--muted);margin-top:5px}.scorebig{font-size:14px;font-weight:850;color:var(--green);margin-top:9px}
+.group-leaders{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.leader{padding:16px}.leader h3{margin:0 0 12px;font-size:15px}.minirow{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.06)}.minirow:first-of-type{border-top:0}.minirow .pos{color:var(--amber);font-weight:900}.minirow .name{font-size:12px;line-height:1.25}.minirow .pts{font-size:12px;color:#c9d6e5;font-weight:800}
+.controls{padding:15px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.select,input[type="search"],textarea{background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:11px;padding:10px 12px;outline:none}.select:focus,input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(85,166,255,.12)}
+.student-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:16px}
+.profile{padding:20px}.profile-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.eyebrow{font-size:12px;color:var(--cyan);text-transform:uppercase;font-weight:850;letter-spacing:.8px}.profile h2{margin:4px 0 6px;font-size:23px}.muted{color:var(--muted)}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.badge{border-radius:999px;padding:6px 9px;font-size:12px;font-weight:800;border:1px solid #34506d;background:#0b192a}.badge.green{border-color:rgba(85,217,145,.4);color:#9ef0bf}.badge.amber{border-color:rgba(255,202,98,.4);color:#ffe0a2}.badge.blue{border-color:rgba(85,166,255,.4);color:#acd2ff}
+.score-circle{width:98px;height:98px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) var(--pct),#24384d 0);position:relative;flex:0 0 auto}.score-circle:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#102039}.score-circle .inside{position:relative;text-align:center;font-weight:950;font-size:21px}.score-circle small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:1px}
+.area-list{margin-top:19px}.area{margin:13px 0}.area-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}.bar{height:9px;border-radius:999px;background:#20344a;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.box{padding:17px}.box h3{margin:0 0 10px;font-size:16px}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{padding:7px 9px;border-radius:9px;font-size:12px;line-height:1.25;border:1px solid}.chip.good{color:#b5f3cb;background:rgba(85,217,145,.08);border-color:rgba(85,217,145,.26)}.chip.bad{color:#ffc0c0;background:rgba(255,124,124,.08);border-color:rgba(255,124,124,.25)}.chip.pending{color:#ffe1a1;background:rgba(255,202,98,.08);border-color:rgba(255,202,98,.25)}
+.reactivos{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.react{border-radius:10px;padding:10px 7px;text-align:center;border:1px solid #2a4058;background:#0b192a}.react strong{display:block;font-size:13px}.react span{font-size:10px;color:var(--muted)}.react.C{border-color:rgba(85,217,145,.35);background:rgba(85,217,145,.08)}.react.I{border-color:rgba(255,124,124,.32);background:rgba(255,124,124,.07)}.react.N{border-color:rgba(255,202,98,.35);background:rgba(255,202,98,.07)}
+.action-panel{padding:18px}.action-panel h3{margin:0 0 6px}.status-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:13px 0}.statusbtn{border:1px solid #35516f;background:#0b192a;color:#c7d7e9;padding:10px;border-radius:10px;font-weight:800}.statusbtn.active{background:#214369;border-color:#5d94cd;color:#fff}.statusbtn[data-status="Seleccionado"].active{background:#174c35;border-color:#47bd80}.statusbtn[data-status="Reserva"].active{background:#5a451a;border-color:#d5a740}.statusbtn[data-status="Candidato"].active{background:#3a2b67;border-color:#9574df}.statusbtn[data-status="Observación"].active{background:#4f2830;border-color:#c36a78}
+.primary{border:0;background:linear-gradient(135deg,#3e8df4,#43cfc7);color:#061321;font-weight:900;border-radius:11px;padding:10px 14px}.secondary{border:1px solid #34506d;background:#0b192a;color:#d5e0ec;font-weight:800;border-radius:11px;padding:9px 13px}.dangerlink{border:0;background:transparent;color:#ff9c9c;padding:8px;font-size:12px}
+.note{width:100%;min-height:105px;resize:vertical;margin-top:8px}.tiny{font-size:11px;color:var(--muted);line-height:1.45}
+.table-wrap{overflow:auto;border-radius:var(--radius)}table{border-collapse:collapse;width:100%;min-width:860px;background:#0d1b2e;border:1px solid var(--line)}th,td{padding:11px 12px;border-bottom:1px solid #20354c;font-size:12px;text-align:left}th{position:sticky;top:0;background:#142944;color:#bcd0e6;text-transform:uppercase;font-size:10px;letter-spacing:.55px;z-index:2}tr:hover td{background:#12263e}td.num{text-align:center;font-weight:850}.clickable{cursor:pointer}.cut td{border-top:3px solid var(--amber)}
+.rankpos{font-weight:1000;color:var(--amber);font-size:14px}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#536b84}.status-dot.sel{background:var(--green)}.status-dot.can{background:var(--purple)}.status-dot.res{background:var(--amber)}.status-dot.obs{background:var(--red)}
+.selection-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.selection-card{padding:18px}.selection-card h3{margin:0 0 12px}.selection-list .selrow{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}.selection-list .selrow:first-child{border-top:0}.selrow .p{font-weight:1000;color:var(--amber)}.selrow .n{font-size:13px;font-weight:800}.selrow .g{font-size:11px;color:var(--muted)}.selrow .s{font-size:13px;font-weight:900;color:#a9efc4}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed #35506d;border-radius:13px}
+.footer{margin-top:34px;color:#71859c;text-align:center;font-size:11px}
+@media(max-width:1050px){.top5{grid-template-columns:repeat(2,1fr)}.grid4{grid-template-columns:repeat(2,1fr)}.student-layout,.selection-grid{grid-template-columns:1fr}.group-leaders{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.shell{padding:17px 12px 45px}.topbar-inner{padding:12px}.version{display:none}.grid4,.top5,.group-leaders,.two-cols{grid-template-columns:1fr}.reactivos{grid-template-columns:repeat(4,1fr)}.profile-top{flex-direction:column}.score-circle{width:88px;height:88px}.controls>*{width:100%}.status-buttons{grid-template-columns:1fr 1fr}.brand small{display:none}}
+
+.auth-gate{
+  min-height:100vh;display:grid;place-items:center;padding:22px;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(85,166,255,.16),transparent 32%),
+    radial-gradient(circle at 85% 80%,rgba(78,217,209,.11),transparent 28%),
+    linear-gradient(180deg,#07111f,#091726);
+}
+.auth-card{
+  width:min(430px,100%);padding:28px;background:linear-gradient(180deg,#12243b,#0d1b2e);
+  border:1px solid #2b4665;border-radius:22px;box-shadow:var(--shadow)
+}
+.auth-card .auth-logo{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;
+  margin-bottom:18px;background:linear-gradient(135deg,#3d8cff,#4ed9d1);color:#05111e;font-size:25px;font-weight:1000}
+.auth-card h1{font-size:24px;margin:0 0 6px}.auth-card p{color:var(--muted);margin:0 0 20px;line-height:1.45}
+.auth-field{display:block;margin:13px 0}.auth-field span{display:block;font-size:12px;color:#b9c9dd;margin-bottom:6px;font-weight:800}
+.auth-field input{width:100%;background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:11px;padding:12px}
+.auth-submit{width:100%;margin-top:8px;border:0;background:linear-gradient(135deg,#3e8df4,#43cfc7);color:#061321;font-weight:950;border-radius:11px;padding:12px}
+.auth-error{min-height:20px;margin-top:10px;color:#ffaaaa;font-size:12px;line-height:1.4}
+.userbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.user-email{font-size:11px;color:#b8c8db;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sync-pill{padding:6px 9px;border:1px solid #335172;border-radius:999px;color:#bdd0e4;font-size:11px;display:flex;align-items:center;gap:6px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#55d991;box-shadow:0 0 0 3px rgba(85,217,145,.12)}
+.sync-pill.busy .sync-dot{background:#ffca62}
+.sync-pill.error .sync-dot{background:#ff7c7c}
+.logout-btn{border:1px solid #35516f;background:#0b192a;color:#d5e0ec;border-radius:9px;padding:6px 9px;font-size:11px;font-weight:800}
+
+</style>
+</head>
+<body>
+
+<div id="authGate" class="auth-gate">
+  <form id="loginForm" class="auth-card">
+    <div class="auth-logo">Σ</div>
+    <h1>Panel de Selección Académica</h1>
+    <p>Acceso privado del coordinador. Inicia sesión con la cuenta que registraste en Firebase.</p>
+    <label class="auth-field"><span>Correo electrónico</span><input id="loginEmail" type="email" autocomplete="username" required></label>
+    <label class="auth-field"><span>Contraseña</span><input id="loginPassword" type="password" autocomplete="current-password" required></label>
+    <button id="loginButton" class="auth-submit" type="submit">Entrar al panel</button>
+    <div id="loginError" class="auth-error"></div>
+  </form>
+</div>
+
+<div class="app" id="appRoot" style="display:none">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><div class="logo">Σ</div><div><h1>Panel de Selección Académica</h1><small>Terceros · Diagnóstico inicial de Matemáticas</small></div></div>
+    <div class="userbar">
+      <div id="syncPill" class="sync-pill"><span class="sync-dot"></span><span id="syncText">Conectando…</span></div>
+      <div id="userEmail" class="user-email"></div>
+      <button id="logoutBtn" class="logout-btn" type="button">Cerrar sesión</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <div class="banner"><strong>Ranking provisional.</strong> En esta primera versión el orden se basa únicamente en el diagnóstico inicial de Matemáticas. Las evaluaciones de Química, Física, Biología, Español y los simulacros se incorporarán después.</div>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="inicio">Resumen</button>
+    <button class="tab" data-view="alumno">Alumno</button>
+    <button class="tab" data-view="ranking">Ranking</button>
+    <button class="tab" data-view="seleccion">Selección</button>
+  </nav>
+
+  <section id="inicio" class="view active">
+    <div class="grid4">
+      <div class="card stat"><div class="label">Alumnos evaluados</div><div class="num" id="statTotal">—</div><div class="sub">3.º A a 3.º F</div></div>
+      <div class="card stat"><div class="label">Mejor resultado</div><div class="num" id="statBest">—</div><div class="sub">Diagnóstico de 12 reactivos</div></div>
+      <div class="card stat"><div class="label">Corte Top 5</div><div class="num" id="statCut">—</div><div class="sub">Resultado del 5.º lugar provisional</div></div>
+      <div class="card stat"><div class="label">Promedio generación</div><div class="num" id="statAvg">—</div><div class="sub">Todos los terceros</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div><h2>Top 5 provisional</h2><p>Primeros candidatos según el diagnóstico de Matemáticas.</p></div></div>
+      <div class="top5" id="top5"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div><h2>Destacados por grupo</h2><p>Los tres mejores resultados de cada salón.</p></div></div>
+      <div class="group-leaders" id="groupLeaders"></div>
+    </div>
+
+    <div class="section card" style="padding:18px">
+      <div class="section-title"><div><h2>Cómo se ordena el ranking</h2><p>Regla sencilla y transparente para esta primera etapa.</p></div></div>
+      <div class="tiny" style="font-size:13px;color:#c5d4e5">
+        <strong>1.</strong> Primero se ordena por número de aciertos (máximo 12). 
+        <strong>2.</strong> Si dos alumnos empatan, se favorece a quien acertó reactivos que resultaron más difíciles para la generación. 
+        <strong>3.</strong> Este desempate solo ordena empates; nunca vale más que un acierto adicional.
+      </div>
+    </div>
+  </section>
+
+  <section id="alumno" class="view">
+    <div class="card controls">
+      <select class="select" id="studentGroup"></select>
+      <select class="select" id="studentSelect" style="min-width:360px;max-width:100%"></select>
+      <button class="secondary" id="prevStudent">← Anterior</button>
+      <button class="secondary" id="nextStudent">Siguiente →</button>
+    </div>
+    <div class="student-layout section">
+      <div>
+        <div class="card profile" id="profile"></div>
+        <div class="two-cols">
+          <div class="card box"><h3>Fortalezas demostradas</h3><div class="chips" id="strengths"></div></div>
+          <div class="card box"><h3>Aprendizajes por reforzar</h3><div class="chips" id="weaknesses"></div><div id="pendingWrap" style="margin-top:9px"></div></div>
+        </div>
+        <div class="card box section"><h3>Detalle de los 12 reactivos</h3><div class="reactivos" id="reactivos"></div></div>
+      </div>
+      <aside class="card action-panel">
+        <h3>Decisión docente</h3>
+        <div class="tiny">Estas marcas son para tu proceso de selección. Se guardan en la nube y se sincronizan entre tus dispositivos.</div>
+        <div class="status-buttons">
+          <button class="statusbtn" data-status="Observación">👁 Observación</button>
+          <button class="statusbtn" data-status="Candidato">⭐ Candidato</button>
+          <button class="statusbtn" data-status="Reserva">🟡 Reserva</button>
+          <button class="statusbtn" data-status="Seleccionado">✓ Seleccionado</button>
+        </div>
+        <button class="dangerlink" id="clearStatus">Quitar marca</button>
+        <h3 style="margin-top:17px">Nota privada</h3>
+        <textarea class="note" id="studentNote" placeholder="Ej. Buen razonamiento; observar desempeño bajo presión..."></textarea>
+        <button class="primary" id="saveNote" style="margin-top:8px">Guardar nota</button>
+        <div class="tiny" id="saveMsg" style="margin-top:7px"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="ranking" class="view">
+    <div class="card controls">
+      <select class="select" id="rankGroup">
+        <option value="ALL">Todos los terceros</option>
+        <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
+      </select>
+      <input type="search" id="rankSearch" placeholder="Buscar alumno..." style="min-width:280px">
+      <button class="secondary" id="exportCsv">Exportar ranking CSV</button>
+    </div>
+    <div class="section table-wrap"><table>
+      <thead><tr><th>Pos.</th><th>Alumno</th><th>Grupo</th><th>Aciertos</th><th>Arit.</th><th>Geom.</th><th>Álgebra</th><th>Estado</th></tr></thead>
+      <tbody id="rankBody"></tbody>
+    </table></div>
+  </section>
+
+  <section id="seleccion" class="view">
+    <div class="selection-grid">
+      <div class="card selection-card">
+        <h3>Top 5 automático</h3>
+        <div class="tiny" style="margin-bottom:8px">Se actualiza con el ranking matemático. Todavía no equivale a la selección definitiva.</div>
+        <div class="selection-list" id="autoTop"></div>
+        <h3 style="margin-top:20px">Reservas automáticas · lugares 6–8</h3>
+        <div class="selection-list" id="autoReserve"></div>
+      </div>
+      <div class="card selection-card">
+        <h3>Marcados por ti</h3>
+        <div id="manualSelection"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">Panel docente privado · Versión 2 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
+</main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged,
+  signOut, setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDocs, setDoc, serverTimestamp,
+  onSnapshot, writeBatch
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCfUES8xD6t7topILYXlPbnsJH9F_FlhHk",
+  authDomain: "panel-academico-es18.firebaseapp.com",
+  projectId: "panel-academico-es18",
+  storageBucket: "panel-academico-es18.firebasestorage.app",
+  messagingSenderId: "966429385656",
+  appId: "1:966429385656:web:3a2a47a60c765028ee254d"
+};
+const ADMIN_UID = "jYnytQhgOgcWDN6orvB2XJAZK6y2";
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const firestore = getFirestore(firebaseApp);
+
+const DB = {"students":[{"id":"3A-01","group":"3A","name":"ARRIETA / CASTILLO * KENIA ISABEL","status":["C","I","I","I","C","I","C","C","I","I","I","C"]},{"id":"3A-02","group":"3A","name":"AVALOS / RUIZ * LUCERO","status":["C","I","I","I","C","I","I","I","I","I","I","I"]},{"id":"3A-03","group":"3A","name":"BARRAGAN / VILLAGRAN * SANTIAGO HIRAM","status":["I","C","I","I","C","I","I","I","I","I","I","I"]},{"id":"3A-04","group":"3A","name":"BENITEZ / PEREZ * JOSUE","status":["C","C","I","I","C","C","C","C","I","I","C","I"]},{"id":"3A-05","group":"3A","name":"CASTILLO / DANIEL * JOSUE DAVID","status":["C","I","I","I","I","C","I","I","I","I","I","C"]},{"id":"3A-06","group":"3A","name":"CISNEROS / ORTIZ * BRIAN ISAI","status":["I","I","I","I","C","I","I","I","I","I","I","I"]},{"id":"3A-07","group":"3A","name":"DIAZ / PATIÑO * LUNA DANAE","status":["C","C","I","I","I","I","I","I","C","I","I","I"]},{"id":"3A-08","group":"3A","name":"DOMINGUEZ / CARO * LUIS DANIEL","status":["I","I","I","I","I","I","I","C","I","C","I","C"]},{"id":"3A-09","group":"3A","name":"DOMINGUEZ / CUESTA * JOSE EFRAIN","status":["I","I","I","I","I","I","I","I","C","I","I","I"]},{"id":"3A-10","group":"3A","name":"DOMINGUEZ / … * IRVIN JOSEFAT","status":["C","I","I","I","C","I","C","I","I","C","I","I"]},{"id":"3A-11","group":"3A","name":"ENRIQUEZ / DURAN * EDWIN ALEJANDRO","status":["C","C","I","I","I","C","I","I","I","I","I","I"]},{"id":"3A-12","group":"3A","name":"ENRIQUEZ / LOPEZ * REYNA CLARISA","status":["C","I","I","I","C","I","I","C","I","C","I","I"]},{"id":"3A-13","group":"3A","name":"ENRIQUEZ / PEREZ * MICHEL ALEXA","status":["I","C","I","I","I","I","I","C","I","I","I","C"]},{"id":"3A-14","group":"3A","name":"GONZALEZ / LUEVANO * YAMILETH","status":["I","I","I","I","C","I","I","I","I","I","I","I"]},{"id":"3A-15","group":"3A","name":"GONZALEZ / RUBI * ALEX DAVID","status":["C","I","C","I","I","C","I","I","C","C","I","I"]},{"id":"3A-16","group":"3A","name":"GONZALEZ / SOTO * CARLOS IRAM","status":["C","C","C","C","C","C","C","I","C","I","C","I"]},{"id":"3A-17","group":"3A","name":"GONZALEZ / VALENZUELA * JOSEPH JOVAN","status":["C","C","I","I","C","I","I","I","I","I","I","C"]},{"id":"3A-18","group":"3A","name":"HERMOSILLO / RODRIGUEZ * HANNA OYUKI","status":["C","C","I","I","C","C","C","C","I","I","I","C"]},{"id":"3A-19","group":"3A","name":"LOPEZ / MENDOZA * XAVIER SANTIAGO","status":["C","C","C","C","C","C","C","I","I","I","C","I"]},{"id":"3A-20","group":"3A","name":"MARTINEZ / MEDRANO * CAMILA","status":["I","I","I","I","I","I","I","I","I","C","I","I"]},{"id":"3A-21","group":"3A","name":"MEDRANO / QUIÑONEZ * GERSON GAEL","status":["I","I","I","I","I","I","C","I","I","I","I","I"]},{"id":"3A-22","group":"3A","name":"MENDOZA / GANDARA * YANDEL","status":["C","C","I","I","I","I","I","I","I","I","C","C"]},{"id":"3A-23","group":"3A","name":"MOMACA / GONZALEZ * IRVIN YAHEL","status":["C","I","I","I","C","I","I","I","I","I","I","I"]},{"id":"3A-24","group":"3A","name":"MORENO / LOREDO * ANGEL MANUEL","status":["C","I","I","I","C","I","C","C","I","I","I","I"]},{"id":"3A-25","group":"3A","name":"ORDOÑEZ / MERAZ * ALONDRA ISAMEL","status":["C","I","C","I","I","I","C","C","I","I","C","C"]},{"id":"3A-26","group":"3A","name":"ORTIZ / DOMINGUEZ * KENIA IDALY","status":["C","I","I","I","I","I","I","I","I","C","I","I"]},{"id":"3A-27","group":"3A","name":"QUINTANA / GONZALEZ * SERGIO RONALDO","status":["I","I","I","I","C","C","I","I","I","I","I","C"]},{"id":"3A-28","group":"3A","name":"SANCHEZ / RASCON * IVANA GUADALUPE","status":["C","I","I","I","I","I","I","I","C","I","I","C"]},{"id":"3B-01","group":"3B","name":"BANDA / HERNANDEZ * KURT ALONSO","status":["I","N","N","I","I","I","I","N","N","N","N","C"]},{"id":"3B-02","group":"3B","name":"BARRAZA / CASTILLO * RICARDO EMMANUEL","status":["I","C","I","I","C","C","I","I","I","I","I","C"]},{"id":"3B-03","group":"3B","name":"BATISTA / MORALES * DIEGO ALEXIS","status":["I","I","I","I","C","I","I","I","C","C","I","I"]},{"id":"3B-04","group":"3B","name":"BELTRAN / AYALA * CALEB JOEL","status":["C","I","I","I","I","I","C","I","I","I","I","I"]},{"id":"3B-05","group":"3B","name":"CASTILLO / CHAVEZ * ALEJANDRA","status":["I","I","I","I","I","I","I","I","I","I","I","I"]},{"id":"3B-06","group":"3B","name":"CATAÑO / ESCALANTE * ITZEL DENALI","status":["C","I","I","C","I","I","I","I","I","I","C","I"]},{"id":"3B-07","group":"3B","name":"CORRAL / IBARRA * JESSE SEBASTIAN","status":["I","I","I","C","I","I","I","I","I","C","C","I"]},{"id":"3B-08","group":"3B","name":"DOMINGUEZ / CHAVIRA * KIMBERLY","status":["I","C","I","I","I","I","I","I","I","I","I","I"]},{"id":"3B-09","group":"3B","name":"DOMINGUEZ / RODRIGUEZ * NATALIA","status":["C","I","C","I","I","I","C","I","I","I","I","I"]},{"id":"3B-10","group":"3B","name":"DUARTE / MARQUEZ * POLETH EYLEN","status":["I","I","I","I","C","I","I","I","I","I","I","I"]},{"id":"3B-11","group":"3B","name":"DURAN / MARBAN * LEONARDO TADEO","status":["C","C","I","I","C","I","C","I","I","C","I","I"]},{"id":"3B-12","group":"3B","name":"GIL / GARCIA * JORGE ALBERTO","status":["I","C","I","C","I","C","I","I","I","I","I","C"]},{"id":"3B-13","group":"3B","name":"GONZALEZ / VILLALOBOS * SARABI SALOME","status":["C","C","I","I","I","I","I","I","C","I","I","C"]},{"id":"3B-14","group":"3B","name":"HERNANDEZ / PARRA * KATNISS HELENA","status":["C","C","I","I","C","C","I","I","I","I","C","C"]},{"id":"3B-15","group":"3B","name":"HERNANDEZ / RASCON * ROOUS CELESTE","status":["C","C","I","I","I","C","N","I","I","I","I","I"]},{"id":"3B-16","group":"3B","name":"HERNANDEZ / SILVA * MARCO ANTONIO","status":["I","C","I","I","C","I","C","C","I","I","C","I"]},{"id":"3B-17","group":"3B","name":"JIMENEZ / TALAMANTES * ABRIL","status":["C","I","C","I","C","I","I","I","I","I","I","C"]},{"id":"3B-18","group":"3B","name":"LEDEZMA / CIERA * CROSBY ALEJANDRO","status":["I","C","C","I","I","I","I","I","I","I","I","C"]},{"id":"3B-19","group":"3B","name":"MORALES / RODRIGUEZ * JOSELYN IVON","status":["I","C","I","I","I","C","I","I","I","I","I","C"]},{"id":"3B-20","group":"3B","name":"NEVAREZ / GRANILLA * DANNA PAOLA","status":["I","C","I","I","C","I","C","I","I","C","C","I"]},{"id":"3B-21","group":"3B","name":"ORTIZ / RASCON * ZOE MELISSA","status":["I","I","I","I","I","C","I","I","I","I","C","C"]},{"id":"3B-22","group":"3B","name":"PEREA / GONZALEZ * CARLOS YAEL","status":["I","I","C","I","C","I","I","I","C","C","I","C"]},{"id":"3B-23","group":"3B","name":"RAMIREZ / DELGADO * OSCAR MANUEL","status":["C","I","I","I","I","I","I","I","I","I","C","I"]},{"id":"3B-24","group":"3B","name":"ROMERO / OLIVAS * LUIS DIEGO","status":["I","I","C","I","I","I","I","I","I","I","C","I"]},{"id":"3B-25","group":"3B","name":"SOTO / ESTRADA * JESUS EMILIANO","status":["I","C","I","I","I","I","I","I","I","I","C","I"]},{"id":"3B-26","group":"3B","name":"VALDEZ / FUENTES * CARLOS DANIEL","status":["C","I","I","I","I","I","I","I","I","I","I","C"]},{"id":"3B-27","group":"3B","name":"ZAMARRON / DELGADO * SANTIAGO","status":["C","C","I","I","C","C","C","C","I","C","C","I"]},{"id":"3C-01","group":"3C","name":"ALVAREZ / GARCIA * HEYDI DAYANA","status":["I","I","I","I","I","I","I","I","I","I","I","I"]},{"id":"3C-02","group":"3C","name":"ARGUELLO / ESTRADA * DARIO ALBERTO","status":["C","C","C","I","C","I","C","I","I","C","I","C"]},{"id":"3C-03","group":"3C","name":"ARVIZU / LOPEZ * DAMIAN","status":["C","I","I","I","C","I","I","I","I","C","I","I"]},{"id":"3C-04","group":"3C","name":"BAEZ / CARDENAS * GAEL RAMSES","status":["C","I","C","I","C","C","C","C","I","C","C","C"]},{"id":"3C-05","group":"3C","name":"BLANCO / VAZQUEZ * DEMIAN ALEXANDER","status":["C","C","C","I","C","I","I","I","I","I","I","I"]},{"id":"3C-06","group":"3C","name":"CALDERON / RUELAS * JOSE MANUEL","status":["I","I","I","I","C","C","C","I","I","I","C","I"]},{"id":"3C-07","group":"3C","name":"CAMACHO / GONZALEZ * HEIDY KARINA","status":["C","I","I","I","I","I","I","I","I","I","C","I"]},{"id":"3C-08","group":"3C","name":"FONG / AYALA * ANIEL GAEL","status":["C","I","I","C","C","C","C","C","I","C","C","I"]},{"id":"3C-09","group":"3C","name":"FRIAS / ROJAS * ENOC SANTIAGO","status":["I","I","I","I","I","I","I","C","I","C","I","I"]},{"id":"3C-10","group":"3C","name":"GONZALEZ / JUAREZ * FLOR","status":["C","I","I","I","C","I","C","I","I","I","I","C"]},{"id":"3C-11","group":"3C","name":"HERNANDEZ / GONZALEZ * XIMENA","status":["C","C","I","I","I","I","I","I","C","I","I","C"]},{"id":"3C-12","group":"3C","name":"HERRERA / URBINA * ASHLEY DAYANA","status":["C","I","C","I","C","I","I","I","I","C","C","C"]},{"id":"3C-13","group":"3C","name":"MACIAS / SIMENTAL * AYLIN MAIRELY","status":["C","I","I","I","I","C","I","I","I","I","I","C"]},{"id":"3C-14","group":"3C","name":"MALDONADO … ATEO ARTURO","status":["I","I","I","I","I","I","I","C","I","C","I","C"]},{"id":"3C-15","group":"3C","name":"MARIN / DURAN * CARLOS DANIEL","status":["C","I","I","I","C","I","I","I","I","C","I","I"]},{"id":"3C-16","group":"3C","name":"MARTINEZ / DOMINGUEZ * JOSE DAMIAN","status":["C","I","I","I","I","I","I","I","I","C","C","C"]},{"id":"3C-17","group":"3C","name":"MENDOZA / CASTILLO * AZUL FERNANDA","status":["I","I","I","I","I","I","I","I","C","I","I","I"]},{"id":"3C-18","group":"3C","name":"OCHOA / VARGAS * CESAR IVAN","status":["C","C","C","I","C","C","C","I","I","C","I","I"]},{"id":"3C-19","group":"3C","name":"ONTIVEROS / VEGA * REYNA DENISSE","status":["I","C","I","I","I","C","C","I","I","I","C","I"]},{"id":"3C-20","group":"3C","name":"PIMENTEL / FRIAS * ALAN SANTIAGO","status":["C","C","C","I","C","C","C","I","I","C","C","C"]},{"id":"3C-21","group":"3C","name":"RAMOS / DIAZ * DILAN AARON","status":["I","C","I","I","I","I","C","I","I","C","I","I"]},{"id":"3C-22","group":"3C","name":"REGALADO / BACA * EDGAR","status":["I","I","I","C","C","I","I","I","I","I","C","I"]},{"id":"3C-23","group":"3C","name":"RODRIGUEZ / LEON * DILAN FRANCISCO","status":["C","I","I","I","C","I","I","I","I","I","C","C"]},{"id":"3C-24","group":"3C","name":"RODRIGUEZ / TRENTI * MANUEL AARON","status":["C","C","I","C","C","C","C","I","I","C","C","I"]},{"id":"3C-25","group":"3C","name":"RUIZ / IRIGOYEN * VICTOR ISMAEL","status":["C","I","I","I","I","C","C","I","I","C","C","C"]},{"id":"3C-26","group":"3C","name":"TORRES / BUSTILLOS * GENESIS NICOLE","status":["I","I","I","I","I","C","I","I","I","I","I","I"]},{"id":"3C-27","group":"3C","name":"TORRES / CARTER * MARIA CAMILA","status":["C","I","I","I","I","C","I","I","I","I","I","I"]},{"id":"3C-28","group":"3C","name":"VALENZUELA / AGUILERA * CAMILA","status":["I","I","I","I","I","I","I","I","I","I","I","C"]},{"id":"3D-01","group":"3D","name":"ATONDO / GRIJALVA * DAILYN FERNANDA","status":["C","C","C","I","I","C","C","C","I","C","I","I"]},{"id":"3D-02","group":"3D","name":"BARRAGAN / PINELA * BRISSA PAULETT","status":["C","I","I","I","I","I","I","C","C","C","I","C"]},{"id":"3D-03","group":"3D","name":"BUSTILLOS / GONZALEZ * KEVIN YAHEL","status":["I","I","I","I","I","I","I","I","C","I","I","I"]},{"id":"3D-04","group":"3D","name":"CASTILLO / VARGAS * GAEL ALEJANDRO","status":["I","I","C","I","C","I","I","I","I","I","I","I"]},{"id":"3D-05","group":"3D","name":"DELGADO / DELGADO * DALIA MELISSA","status":["C","C","I","I","I","C","I","I","I","I","C","C"]},{"id":"3D-06","group":"3D","name":"DOMINGUEZ / ROMERO * YENI NAHOMI","status":["I","I","I","I","C","I","I","I","C","C","I","C"]},{"id":"3D-07","group":"3D","name":"GALLARZO / OROZCO * ABDIEL YAMIR","status":["C","I","I","I","I","I","I","I","I","C","I","I"]},{"id":"3D-08","group":"3D","name":"GARCIA / VEGA * ARACELY ALEJANDRA","status":["I","I","I","I","I","C","I","I","I","I","C","I"]},{"id":"3D-09","group":"3D","name":"GASTELUM / ZUBIA * NAHOMI","status":["I","C","I","I","C","I","I","I","C","I","I","I"]},{"id":"3D-10","group":"3D","name":"GUTIERREZ / RASCON * ALEXA ISABELLA","status":["I","I","I","I","C","C","I","I","I","I","C","C"]},{"id":"3D-11","group":"3D","name":"HERNANDEZ / … DON OCTAVIO","status":["C","I","C","I","C","C","C","C","I","I","I","C"]},{"id":"3D-12","group":"3D","name":"HERNANDEZ / VARELA * GAEL ALEJANDRO","status":["C","C","I","I","C","C","C","C","I","C","C","C"]},{"id":"3D-13","group":"3D","name":"JIMENEZ / MARTINEZ * SANTIAGO","status":["C","I","I","I","I","I","I","I","I","I","I","I"]},{"id":"3D-14","group":"3D","name":"LUGO / MORRIS * DANNA CRISTELL","status":["I","I","I","C","I","C","I","I","I","C","C","C"]},{"id":"3D-15","group":"3D","name":"MARES / CRUZ * DANIEL ADRIAN","status":["I","C","I","I","C","I","I","I","I","I","I","C"]},{"id":"3D-16","group":"3D","name":"ORDOÑEZ / ARMENTA * JIREH DANELY","status":["C","I","I","I","C","I","I","I","I","I","I","C"]},{"id":"3D-17","group":"3D","name":"ORTIZ / ARREOLA * BIANCA SARAHI","status":["C","I","C","I","I","I","I","I","I","I","I","I"]},{"id":"3D-18","group":"3D","name":"PALOMINO / PARRA * NAHOMI AYLIN","status":["C","C","I","I","C","I","I","I","I","I","I","I"]},{"id":"3D-19","group":"3D","name":"RAMIREZ / ARELLANES * MERARY YOANA","status":["I","C","C","I","I","I","I","I","I","I","C","C"]},{"id":"3D-20","group":"3D","name":"RAMIREZ / ORNELAS * MITZY YUZALETH","status":["I","I","I","C","I","C","C","I","I","C","I","N"]},{"id":"3D-21","group":"3D","name":"RODRIGUEZ / CHAVIRA * NICOLE SAMANTHA","status":["I","I","I","I","C","C","I","I","I","I","I","C"]},{"id":"3D-22","group":"3D","name":"RODRIGUEZ / ESCARCEGA * EDUARDO","status":["C","C","C","I","I","I","I","C","I","C","C","I"]},{"id":"3D-23","group":"3D","name":"ROJO / QUEZADA * DEISY NAHOMY","status":["C","I","I","I","I","I","I","I","I","I","C","C"]},{"id":"3D-24","group":"3D","name":"RUBIO / ORTEGA * MARIA FERNANDA","status":["C","I","I","I","C","C","I","C","I","C","I","C"]},{"id":"3D-25","group":"3D","name":"TRUJILLO / SAUCEDO * RODRIGO OBED","status":["C","I","I","I","I","I","C","I","I","C","I","I"]},{"id":"3D-26","group":"3D","name":"VEGA / CRUZ * QOHOLET MICHELLE","status":["I","I","I","C","I","I","I","C","I","I","I","C"]},{"id":"3E-01","group":"3E","name":"ACOSTA / PASCUALILLO * JESUS ALAN","status":["I","C","I","I","C","I","I","I","I","I","I","I"]},{"id":"3E-02","group":"3E","name":"ARANDA / * ADRIAN ANDRES","status":["C","I","I","C","C","N","I","I","I","C","N","C"]},{"id":"3E-03","group":"3E","name":"BARRAZA / CA…E ALEJANDRO","status":["I","I","I","I","C","I","C","I","I","C","I","I"]},{"id":"3E-04","group":"3E","name":"BAÑUELOS / TRUJILLO * VICTOR ARMANDO","status":["C","C","I","I","C","I","I","C","I","I","C","I"]},{"id":"3E-05","group":"3E","name":"BORJAS / ANDUJO * FIDEL ALEJANDRO","status":["I","I","I","I","C","C","I","C","I","C","I","I"]},{"id":"3E-06","group":"3E","name":"BRINGAS / FRANCO * EVELYN","status":["I","I","I","I","I","I","I","C","I","I","I","I"]},{"id":"3E-07","group":"3E","name":"CERVANTES / MUÑOZ * ALEXANDER RAMON","status":["I","I","I","I","I","C","I","I","I","I","I","C"]},{"id":"3E-08","group":"3E","name":"DOMINGUEZ / LECHUGA * ANGELICA NICOLE","status":["C","I","I","I","I","I","I","I","I","I","I","C"]},{"id":"3E-09","group":"3E","name":"GASTELUM / CASTILLO * IAN SAID","status":["I","I","I","I","I","C","I","I","I","I","I","C"]},{"id":"3E-10","group":"3E","name":"HERNANDEZ / VAZQUEZ * JAVIER OMAR","status":["I","I","I","I","I","C","I","C","I","I","I","I"]},{"id":"3E-11","group":"3E","name":"HOLGUIN / JUAREZ * ASHLEY LIZETH","status":["C","C","I","I","C","C","C","I","I","C","C","C"]},{"id":"3E-12","group":"3E","name":"MARTINEZ / MENDOZA * MARVIN GAEL","status":["I","I","I","I","I","I","I","I","C","I","I","I"]},{"id":"3E-13","group":"3E","name":"MENDOZA / GONZALEZ * LISETH","status":["C","I","C","I","C","C","C","I","I","C","I","I"]},{"id":"3E-14","group":"3E","name":"MONTES / ALVAREZ * AIME","status":["I","C","I","I","I","C","C","C","I","I","I","I"]},{"id":"3E-15","group":"3E","name":"MORENO / LOPEZ * JOSE DAVID","status":["I","C","I","C","C","C","I","I","I","C","I","C"]},{"id":"3E-16","group":"3E","name":"OROZCO / MI…HA PAULETTE","status":["C","I","I","I","I","I","I","C","I","I","I","C"]},{"id":"3E-17","group":"3E","name":"PADILLA / SERRANO * JESUS ALEJANDRO","status":["C","I","C","I","I","I","I","C","I","I","I","I"]},{"id":"3E-18","group":"3E","name":"RAMIREZ / ROMERO * GAEL ALEXANDER","status":["I","C","I","I","I","C","C","I","C","I","I","I"]},{"id":"3E-19","group":"3E","name":"RODRIGUEZ / CASTRO * PRISILA ASSENETH","status":["C","I","I","I","I","C","C","C","I","C","C","C"]},{"id":"3E-20","group":"3E","name":"SAUCEDO / VALENZUELA * LEONEL FABIAN","status":["I","C","C","I","C","I","I","I","I","I","I","I"]},{"id":"3E-21","group":"3E","name":"SERVIN / GIRON * CARLOS XAVIER","status":["C","C","I","I","C","I","C","C","I","I","C","C"]},{"id":"3E-22","group":"3E","name":"TORRES / PERAZA * OLIVER SAHID","status":["C","C","I","I","C","C","C","I","I","C","I","I"]},{"id":"3E-23","group":"3E","name":"TORRES / PEREZ * NATHALIA","status":["I","I","I","I","I","I","I","C","I","I","I","C"]},{"id":"3E-24","group":"3E","name":"VAZQUEZ / PEREZ * JUAN PABLO","status":["C","C","I","I","C","I","C","I","I","I","I","I"]},{"id":"3F-01","group":"3F","name":"ARROYO / RAMOS * ANDREA IDALY","status":["C","I","I","I","I","I","I","I","I","I","I","C"]},{"id":"3F-02","group":"3F","name":"BATISTA / DE LA CRUZ * DANIA NICOL","status":["C","C","I","C","I","C","I","I","I","C","I","C"]},{"id":"3F-03","group":"3F","name":"CASTILLO / DURAN * ABRIL XIMENA","status":["I","C","I","I","C","C","C","I","I","C","I","C"]},{"id":"3F-04","group":"3F","name":"CERVANTES / OCHOA * JESUS ZAID","status":["I","C","I","I","I","I","C","I","C","C","I","C"]},{"id":"3F-05","group":"3F","name":"CHAVEZ / CASTRO * LUIS ANGEL","status":["C","I","I","I","C","I","C","I","I","I","C","C"]},{"id":"3F-06","group":"3F","name":"CORDERO / CARDENAS * MELANY NATALIA","status":["I","C","I","I","I","I","I","I","I","I","C","I"]},{"id":"3F-07","group":"3F","name":"ELIZONDO / NUÑEZ * IRINA ELEANE","status":["C","I","I","I","I","C","I","C","I","I","C","I"]},{"id":"3F-08","group":"3F","name":"ESPINOZA / HERNANDEZ * ILSE CLARIBEL","status":["I","I","C","I","I","C","I","I","I","I","I","I"]},{"id":"3F-09","group":"3F","name":"GAMEZ / CERVANTES * YAZMIN DANIELA","status":["I","I","I","I","I","I","I","I","I","I","I","I"]},{"id":"3F-10","group":"3F","name":"GARCIA / PRADO * JAIME ANDRES","status":["C","C","I","I","C","I","C","C","I","C","C","C"]},{"id":"3F-11","group":"3F","name":"GONZALEZ / CARDONA * IKEER TADEO","status":["C","I","I","I","I","I","I","I","I","I","I","C"]},{"id":"3F-12","group":"3F","name":"GONZALEZ / JIMENEZ * ASTRID GUADALUPE","status":["C","I","I","I","I","I","I","I","I","I","C","C"]},{"id":"3F-13","group":"3F","name":"GRIJALVA / CONTRERAS * LUIS ERVEY","status":["I","C","I","I","I","I","I","I","I","I","C","I"]},{"id":"3F-14","group":"3F","name":"GUTIERREZ / CRUZ * ISAIAS JACEL","status":["I","C","I","I","C","I","I","I","I","I","C","I"]},{"id":"3F-15","group":"3F","name":"HOLGUIN / CANO * GAEL FERNANDO","status":["C","I","I","I","I","I","I","I","I","C","C","I"]},{"id":"3F-16","group":"3F","name":"MANCETA / SERNA * JESUS LEONARDO","status":["C","I","C","C","I","C","C","I","I","I","I","C"]},{"id":"3F-17","group":"3F","name":"NEVAREZ / JIMENEZ * SUSANA GUADALUPE","status":["I","I","I","I","I","I","I","C","I","I","C","C"]},{"id":"3F-18","group":"3F","name":"OLIVAS / MENDEZ * ESTEBAN","status":["C","I","I","I","I","C","I","I","I","I","I","I"]},{"id":"3F-19","group":"3F","name":"OLIVAS / PIÑUELAS * YULIANA","status":["C","C","I","I","C","C","I","C","I","C","I","C"]},{"id":"3F-20","group":"3F","name":"PEREA / CHAPARRO * AXEL ISMAEL","status":["C","I","C","I","I","I","C","I","I","I","C","I"]},{"id":"3F-21","group":"3F","name":"PEREZ / MACIAS * EDGAR MATEO","status":["I","I","C","C","I","I","I","I","I","C","C","I"]},{"id":"3F-22","group":"3F","name":"RENTERIA / MONGE * ANAHY","status":["C","C","I","C","I","I","I","I","I","C","I","I"]},{"id":"3F-23","group":"3F","name":"REYES / CASTRO * AXEL RAUL","status":["I","I","I","I","I","I","I","I","I","I","I","I"]},{"id":"3F-24","group":"3F","name":"REZA / RODRIGUEZ * DANEIRY SOFIA","status":["C","I","C","I","C","C","C","I","I","I","C","C"]},{"id":"3F-25","group":"3F","name":"SANTANA / TORRES * LEONARDO","status":["I","I","C","I","C","C","C","I","I","I","I","C"]},{"id":"3F-26","group":"3F","name":"SAYTO / CISNEROS * AYLIN DAYANA","status":["C","I","I","I","I","I","I","C","I","I","I","C"]},{"id":"3F-27","group":"3F","name":"SOTO / RASCON * ARIEL SANTIAGO","status":["I","I","I","I","I","I","I","C","I","C","I","I"]},{"id":"3F-28","group":"3F","name":"VARELA / CHAVIRA * HAZIEL ALEJANDRO","status":["I","C","I","I","I","I","I","I","I","C","I","I"]},{"id":"3F-29","group":"3F","name":"ZEPEDA / JIMENEZ * JESUS LEONEL","status":["C","C","I","I","C","C","C","I","I","C","I","I"]}],"skills":[{"n":1,"area":"Aritmética","short":"Orden de operaciones","full":"Resolver operaciones combinadas respetando el orden de las operaciones."},{"n":2,"area":"Aritmética","short":"Números con signo","full":"Operar con números con signo dentro de operaciones combinadas."},{"n":3,"area":"Aritmética","short":"Fracciones","full":"Sumar fracciones y simplificar el resultado."},{"n":4,"area":"Aritmética","short":"Porcentajes y descuentos","full":"Calcular un descuento porcentual y obtener el precio final."},{"n":5,"area":"Geometría","short":"Ángulos de triángulos","full":"Calcular un ángulo faltante usando la suma de los ángulos interiores de un triángulo."},{"n":6,"area":"Geometría","short":"Perímetro y medida faltante","full":"Usar el perímetro de un rectángulo para encontrar una medida faltante."},{"n":7,"area":"Geometría","short":"Área compuesta","full":"Calcular el área de una figura compuesta."},{"n":8,"area":"Geometría","short":"Problemas geométricos de varios pasos","full":"Resolver problemas de perímetro de varios pasos y usar correctamente un resultado intermedio."},{"n":9,"area":"Álgebra","short":"Sustitución algebraica","full":"Sustituir valores, incluidos números negativos, en expresiones algebraicas."},{"n":10,"area":"Álgebra","short":"Términos semejantes","full":"Identificar y reducir términos semejantes."},{"n":11,"area":"Álgebra","short":"Ecuaciones","full":"Resolver ecuaciones de primer grado."},{"n":12,"area":"Álgebra","short":"Lenguaje algebraico","full":"Traducir una expresión verbal al lenguaje algebraico."}],"itemRates":[0.5493827160493827,0.37037037037037035,0.18518518518518517,0.10493827160493827,0.43209876543209874,0.35185185185185186,0.30246913580246915,0.22839506172839505,0.10493827160493827,0.3395061728395062,0.3148148148148148,0.4382716049382716],"meta":{"total":162,"groups":6,"version":"1.0","scope":"Diagnóstico inicial de Matemáticas — terceros"}};
+const students = DB.students;
+const skills = DB.skills;
+const itemRates = DB.itemRates;
+const groupOrder = ["3A","3B","3C","3D","3E","3F"];
+
+const stateKey = "panelAcademicoV1_marks";
+const noteKey = "panelAcademicoV1_notes";
+let marks = {};
+let notes = {};
+let currentUser = null;
+let unsubscribeCloud = null;
+let appInitialized = false;
+
+function setSyncStatus(message, kind="ok"){
+  const pill=document.getElementById("syncPill");
+  const txt=document.getElementById("syncText");
+  if(!pill||!txt)return;
+  pill.classList.toggle("busy",kind==="busy");
+  pill.classList.toggle("error",kind==="error");
+  txt.textContent=message;
+}
+function persistLocalCache(){
+  localStorage.setItem(stateKey,JSON.stringify(marks));
+  localStorage.setItem(noteKey,JSON.stringify(notes));
+}
+function refreshCloudDependentViews(){
+  if(!appInitialized)return;
+  const s=currentStudent();
+  if(s) renderStudent(s.id);
+  renderRanking();
+  renderSelection();
+}
+async function saveStudentState(studentId){
+  if(!currentUser) throw new Error("No hay una sesión activa.");
+  setSyncStatus("Guardando…","busy");
+  await setDoc(doc(firestore,"users",currentUser.uid,"studentState",studentId),{
+    status: marks[studentId] || null,
+    note: notes[studentId] || "",
+    updatedAt: serverTimestamp()
+  },{merge:true});
+  persistLocalCache();
+  setSyncStatus("Sincronizado");
+}
+async function loadCloudState(user){
+  const ref=collection(firestore,"users",user.uid,"studentState");
+  const initial=await getDocs(ref);
+
+  marks={}; notes={};
+  initial.forEach(d=>{
+    const x=d.data();
+    if(x.status) marks[d.id]=x.status;
+    if(typeof x.note==="string" && x.note) notes[d.id]=x.note;
+  });
+
+  // Migra automáticamente las marcas/notas de la versión local anterior
+  // solo si la nube todavía está vacía.
+  if(initial.empty){
+    const localMarks=JSON.parse(localStorage.getItem(stateKey)||"{}");
+    const localNotes=JSON.parse(localStorage.getItem(noteKey)||"{}");
+    const ids=[...new Set([...Object.keys(localMarks),...Object.keys(localNotes)])];
+    if(ids.length){
+      setSyncStatus("Migrando datos locales…","busy");
+      const batch=writeBatch(firestore);
+      ids.forEach(id=>{
+        batch.set(doc(firestore,"users",user.uid,"studentState",id),{
+          status: localMarks[id] || null,
+          note: localNotes[id] || "",
+          updatedAt: serverTimestamp()
+        },{merge:true});
+      });
+      await batch.commit();
+      marks=localMarks; notes=localNotes;
+    }
+  }
+  persistLocalCache();
+
+  if(unsubscribeCloud) unsubscribeCloud();
+  unsubscribeCloud=onSnapshot(ref,snap=>{
+    const nextMarks={}, nextNotes={};
+    snap.forEach(d=>{
+      const x=d.data();
+      if(x.status) nextMarks[d.id]=x.status;
+      if(typeof x.note==="string" && x.note) nextNotes[d.id]=x.note;
+    });
+    marks=nextMarks; notes=nextNotes;
+    persistLocalCache();
+    setSyncStatus("Sincronizado");
+    refreshCloudDependentViews();
+  },err=>{
+    console.error(err);
+    setSyncStatus("Error de sincronización","error");
+  });
+}
+
+function stats(s){
+  const correct=s.status.filter(x=>x==="C").length;
+  const area=(a,b)=>s.status.slice(a,b).filter(x=>x==="C").length;
+  const hard=s.status.reduce((sum,x,i)=>sum+(x==="C"?(1-itemRates[i]):0),0);
+  return {correct,pct:correct/12*100,arit:area(0,4),geo:area(4,8),alg:area(8,12),hard};
+}
+function ranked(list){
+  return [...list].sort((a,b)=>{
+    const A=stats(a),B=stats(b);
+    return B.correct-A.correct || B.hard-A.hard || groupOrder.indexOf(a.group)-groupOrder.indexOf(b.group) || a.name.localeCompare(b.name,"es");
+  });
+}
+const genRank = ranked(students);
+const rankMap = Object.fromEntries(genRank.map((s,i)=>[s.id,i+1]));
+const groupRankMap={};
+groupOrder.forEach(g=>{
+  ranked(students.filter(s=>s.group===g)).forEach((s,i)=>groupRankMap[s.id]=i+1);
+});
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function shortName(n){return n.replace(" * "," · ")}
+function markClass(m){return m==="Seleccionado"?"sel":m==="Candidato"?"can":m==="Reserva"?"res":m==="Observación"?"obs":""}
+function areaLabel(v){return `${v}/4 · ${Math.round(v/4*100)}%`}
+
+function renderHome(){
+  const ss=students.map(stats);
+  const avg=ss.reduce((a,b)=>a+b.correct,0)/students.length;
+  document.getElementById("statTotal").textContent=students.length;
+  document.getElementById("statBest").textContent=`${genRank[0] ? stats(genRank[0]).correct : 0}/12`;
+  document.getElementById("statCut").textContent=`${genRank[4] ? stats(genRank[4]).correct : 0}/12`;
+  document.getElementById("statAvg").textContent=`${avg.toFixed(2)}/12`;
+
+  document.getElementById("top5").innerHTML=genRank.slice(0,5).map((s,i)=>{
+    const st=stats(s);
+    return `<div class="card rank-card clickable" data-open="${s.id}">
+      <div class="medal">Lugar provisional</div><div class="place">#${i+1}</div>
+      <div class="nm">${esc(shortName(s.name))}</div><div class="grp">${s.group}</div>
+      <div class="scorebig">${st.correct}/12 · ${st.pct.toFixed(1)}%</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("groupLeaders").innerHTML=groupOrder.map(g=>{
+    const top=ranked(students.filter(s=>s.group===g)).slice(0,3);
+    return `<div class="card leader"><h3>${g}</h3>${top.map((s,i)=>`<div class="minirow clickable" data-open="${s.id}">
+      <div class="pos">#${i+1}</div><div class="name">${esc(shortName(s.name))}</div><div class="pts">${stats(s).correct}/12</div>
+    </div>`).join("")}</div>`;
+  }).join("");
+}
+
+function setupStudentSelectors(){
+  const gs=document.getElementById("studentGroup");
+  gs.innerHTML=groupOrder.map(g=>`<option>${g}</option>`).join("");
+  gs.addEventListener("change",()=>fillStudentSelect());
+  fillStudentSelect("3A");
+}
+function fillStudentSelect(group, selectedId){
+  const gs=document.getElementById("studentGroup");
+  if(group) gs.value=group;
+  const arr=students.filter(s=>s.group===gs.value).sort((a,b)=>a.name.localeCompare(b.name,"es"));
+  const sel=document.getElementById("studentSelect");
+  sel.innerHTML=arr.map(s=>`<option value="${s.id}">${esc(shortName(s.name))}</option>`).join("");
+  if(selectedId && arr.some(s=>s.id===selectedId)) sel.value=selectedId;
+  sel.onchange=()=>renderStudent(sel.value);
+  if(arr.length) renderStudent(sel.value);
+}
+function openStudent(id){
+  const s=students.find(x=>x.id===id); if(!s)return;
+  showView("alumno");
+  fillStudentSelect(s.group,id);
+}
+function renderStudent(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  const st=stats(s);
+  const place=rankMap[s.id], gp=groupRankMap[s.id];
+  document.getElementById("profile").innerHTML=`
+    <div class="profile-top">
+      <div><div class="eyebrow">${s.group} · Ranking generación #${place}</div>
+        <h2>${esc(shortName(s.name))}</h2>
+        <div class="muted">Posición en ${s.group}: <strong>#${gp}</strong> · Resultado global: <strong>${st.correct}/12</strong></div>
+        <div class="badges">
+          <span class="badge blue">Aritmética ${areaLabel(st.arit)}</span>
+          <span class="badge blue">Geometría ${areaLabel(st.geo)}</span>
+          <span class="badge blue">Álgebra ${areaLabel(st.alg)}</span>
+          ${marks[s.id]?`<span class="badge amber">${esc(marks[s.id])}</span>`:""}
+        </div>
+      </div>
+      <div class="score-circle" style="--pct:${st.pct}%"><div class="inside">${st.pct.toFixed(0)}%<small>diagnóstico</small></div></div>
+    </div>
+    <div class="area-list">
+      ${[["Aritmética",st.arit],["Geometría",st.geo],["Álgebra",st.alg]].map(([n,v])=>`
+      <div class="area"><div class="area-head"><span>${n}</span><strong>${v}/4</strong></div>
+      <div class="bar"><div class="fill" style="width:${v/4*100}%"></div></div></div>`).join("")}
+    </div>`;
+  const good=[],bad=[],pending=[];
+  s.status.forEach((v,i)=>{ if(v==="C")good.push(skills[i]); else if(v==="I")bad.push(skills[i]); else pending.push(skills[i]);});
+  document.getElementById("strengths").innerHTML=good.length?good.map(x=>`<span class="chip good">${esc(x.short)}</span>`).join(""):`<span class="tiny">No se observaron fortalezas confirmadas en este instrumento.</span>`;
+  document.getElementById("weaknesses").innerHTML=bad.length?bad.map(x=>`<span class="chip bad">${esc(x.short)}</span>`).join(""):`<span class="tiny">No se observaron dificultades evidentes en este instrumento.</span>`;
+  document.getElementById("pendingWrap").innerHTML=pending.length?`<div class="chips">${pending.map(x=>`<span class="chip pending">Verificar: ${esc(x.short)}</span>`).join("")}</div>`:"";
+  document.getElementById("reactivos").innerHTML=s.status.map((v,i)=>`<div class="react ${v}" title="${esc(skills[i].full)}"><strong>R${i+1} · ${v}</strong><span>${esc(skills[i].short)}</span></div>`).join("");
+  document.querySelectorAll(".statusbtn").forEach(b=>b.classList.toggle("active",marks[s.id]===b.dataset.status));
+  document.getElementById("studentNote").value=notes[s.id]||"";
+  document.getElementById("saveMsg").textContent="";
+}
+function currentStudent(){
+  return students.find(s=>s.id===document.getElementById("studentSelect").value);
+}
+document.querySelectorAll(".statusbtn").forEach(btn=>btn.addEventListener("click",async()=>{
+  const s=currentStudent();if(!s)return;
+  const previous=marks[s.id];
+  marks[s.id]=btn.dataset.status;
+  renderStudent(s.id);renderRanking();renderSelection();
+  try{
+    await saveStudentState(s.id);
+  }catch(err){
+    console.error(err);
+    if(previous) marks[s.id]=previous; else delete marks[s.id];
+    renderStudent(s.id);renderRanking();renderSelection();
+    setSyncStatus("No se pudo guardar","error");
+    alert("No se pudo guardar el cambio en la nube. Revisa tu conexión e inténtalo de nuevo.");
+  }
+}));
+document.getElementById("clearStatus").addEventListener("click",async()=>{
+  const s=currentStudent();if(!s)return;
+  const previous=marks[s.id];
+  delete marks[s.id];
+  renderStudent(s.id);renderRanking();renderSelection();
+  try{
+    await saveStudentState(s.id);
+  }catch(err){
+    console.error(err);
+    if(previous) marks[s.id]=previous;
+    renderStudent(s.id);renderRanking();renderSelection();
+    setSyncStatus("No se pudo guardar","error");
+  }
+});
+document.getElementById("saveNote").addEventListener("click",async()=>{
+  const s=currentStudent();if(!s)return;
+  const previous=notes[s.id]||"";
+  notes[s.id]=document.getElementById("studentNote").value.trim();
+  document.getElementById("saveMsg").textContent="Guardando…";
+  try{
+    await saveStudentState(s.id);
+    document.getElementById("saveMsg").textContent="Nota guardada y sincronizada.";
+  }catch(err){
+    console.error(err);
+    notes[s.id]=previous;
+    document.getElementById("studentNote").value=previous;
+    document.getElementById("saveMsg").textContent="No se pudo guardar la nota.";
+    setSyncStatus("No se pudo guardar","error");
+  }
+});
+function moveStudent(delta){
+  const sel=document.getElementById("studentSelect");
+  let i=sel.selectedIndex+delta;
+  if(i<0||i>=sel.options.length)return;
+  sel.selectedIndex=i;renderStudent(sel.value);
+}
+document.getElementById("prevStudent").onclick=()=>moveStudent(-1);
+document.getElementById("nextStudent").onclick=()=>moveStudent(1);
+
+function renderRanking(){
+  const g=document.getElementById("rankGroup").value;
+  const q=document.getElementById("rankSearch").value.trim().toLowerCase();
+  let list=g==="ALL"?genRank:ranked(students.filter(s=>s.group===g));
+  if(q)list=list.filter(s=>s.name.toLowerCase().includes(q));
+  document.getElementById("rankBody").innerHTML=list.map((s,i)=>{
+    const st=stats(s), global=g==="ALL", pos=global?rankMap[s.id]:groupRankMap[s.id];
+    const m=marks[s.id]||"";
+    const cut=global && pos===6 ? "cut":"";
+    return `<tr class="clickable ${cut}" data-open="${s.id}">
+      <td><span class="rankpos">#${pos}</span></td>
+      <td><strong>${esc(shortName(s.name))}</strong></td><td>${s.group}</td>
+      <td class="num">${st.correct}/12<br><span class="muted">${st.pct.toFixed(1)}%</span></td>
+      <td class="num">${st.arit}/4</td><td class="num">${st.geo}/4</td><td class="num">${st.alg}/4</td>
+      <td>${m?`<span class="status-dot ${markClass(m)}"></span>${esc(m)}`:"—"}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="8" class="empty">Sin resultados.</td></tr>`;
+}
+document.getElementById("rankGroup").onchange=renderRanking;
+document.getElementById("rankSearch").oninput=renderRanking;
+
+function renderSelection(){
+  const row=s=>{const st=stats(s);return `<div class="selrow clickable" data-open="${s.id}"><div class="p">#${rankMap[s.id]}</div><div><div class="n">${esc(shortName(s.name))}</div><div class="g">${s.group}</div></div><div class="s">${st.correct}/12</div></div>`}
+  document.getElementById("autoTop").innerHTML=genRank.slice(0,5).map(row).join("");
+  document.getElementById("autoReserve").innerHTML=genRank.slice(5,8).map(row).join("");
+  const picked=genRank.filter(s=>marks[s.id]);
+  if(!picked.length){document.getElementById("manualSelection").innerHTML=`<div class="empty">Todavía no has marcado alumnos como observación, candidato, reserva o seleccionado.</div>`;return;}
+  const order=["Seleccionado","Candidato","Reserva","Observación"];
+  document.getElementById("manualSelection").innerHTML=order.map(m=>{
+    const arr=picked.filter(s=>marks[s.id]===m);
+    if(!arr.length)return "";
+    return `<div style="margin-bottom:15px"><div class="eyebrow">${m}</div><div class="selection-list">${arr.map(row).join("")}</div></div>`;
+  }).join("");
+}
+document.getElementById("exportCsv").onclick=()=>{
+  const rows=[["Posicion","Alumno","Grupo","Aciertos","Porcentaje","Aritmetica","Geometria","Algebra","Estado"]];
+  genRank.forEach(s=>{const st=stats(s);rows.push([rankMap[s.id],s.name,s.group,st.correct,st.pct.toFixed(1),st.arit,st.geo,st.alg,marks[s.id]||""]);});
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ranking_terceros_matematicas.csv";a.click();URL.revokeObjectURL(a.href);
+};
+
+function showView(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===id));
+  if(id==="ranking")renderRanking();
+  if(id==="seleccion")renderSelection();
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
+document.addEventListener("click",e=>{
+  const x=e.target.closest("[data-open]");
+  if(x)openStudent(x.dataset.open);
+});
+
+const loginForm=document.getElementById("loginForm");
+const loginError=document.getElementById("loginError");
+const loginButton=document.getElementById("loginButton");
+
+loginForm.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  loginError.textContent="";
+  loginButton.disabled=true;
+  loginButton.textContent="Ingresando…";
+  try{
+    await setPersistence(auth,browserLocalPersistence);
+    await signInWithEmailAndPassword(
+      auth,
+      document.getElementById("loginEmail").value.trim(),
+      document.getElementById("loginPassword").value
+    );
+  }catch(err){
+    console.error(err);
+    loginError.textContent="No fue posible iniciar sesión. Verifica el correo y la contraseña.";
+  }finally{
+    loginButton.disabled=false;
+    loginButton.textContent="Entrar al panel";
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click",()=>signOut(auth));
+
+onAuthStateChanged(auth,async(user)=>{
+  if(!user){
+    currentUser=null;
+    if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null;}
+    document.getElementById("appRoot").style.display="none";
+    document.getElementById("authGate").style.display="grid";
+    document.getElementById("loginPassword").value="";
+    return;
+  }
+
+  if(user.uid!==ADMIN_UID){
+    loginError.textContent="Esta cuenta no tiene autorización para acceder al panel.";
+    await signOut(auth);
+    return;
+  }
+
+  currentUser=user;
+  document.getElementById("userEmail").textContent=user.email||"Cuenta autorizada";
+  document.getElementById("authGate").style.display="none";
+  document.getElementById("appRoot").style.display="block";
+  setSyncStatus("Cargando…","busy");
+
+  try{
+    await loadCloudState(user);
+    if(!appInitialized){
+      renderHome();
+      setupStudentSelectors();
+      renderRanking();
+      renderSelection();
+      appInitialized=true;
+    }else{
+      refreshCloudDependentViews();
+    }
+    setSyncStatus("Sincronizado");
+  }catch(err){
+    console.error(err);
+    setSyncStatus("Error de conexión","error");
+    alert("Se inició sesión, pero no fue posible cargar Firestore. Revisa las reglas y la conexión.");
+  }
+});
+</script>
+</body>
+</html>
