@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>Panel Académico · Selección y Seguimiento</title>
+<title>Panel Académico · Selección, Seguimiento y Evaluaciones</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0d1b2e;--panel2:#12243b;--line:#233a56;
@@ -129,6 +129,25 @@ button{cursor:pointer}
   .track-summary,.follow-summary,.track-checks{grid-template-columns:1fr}
 }
 
+
+/* Evaluaciones y ranking dinámico */
+.eval-grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+.eval-form,.eval-list-card,.eval-capture{padding:18px}
+.eval-form h3,.eval-list-card h3,.eval-capture h3{margin:0 0 7px}
+.eval-field{display:block;margin:11px 0}.eval-field span{display:block;color:#b9c9dd;font-size:11px;font-weight:850;margin-bottom:5px}
+.eval-field input,.eval-field select{width:100%;background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:10px;padding:10px 11px}
+.eval-list{margin-top:10px}.eval-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07);align-items:center}.eval-row:first-child{border-top:0}
+.eval-row-title{font-size:13px;font-weight:900}.eval-row-meta{font-size:10px;color:var(--muted);margin-top:3px}.eval-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.eval-actions button{padding:7px 9px;border-radius:9px;font-size:11px;font-weight:850}
+.eval-capture{margin-top:16px}.eval-capture.hidden{display:none}.eval-capture-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.eval-capture-head .meta{font-size:11px;color:var(--muted);margin-top:4px}
+.score-input{width:92px;background:#091728;border:1px solid #2d4867;color:var(--text);border-radius:8px;padding:7px 8px;text-align:center}.score-input:focus{border-color:var(--blue);outline:none}
+.eval-progress{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.eval-progress .badge{background:#0b192a}
+.subject-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}.subject-card{padding:11px;border:1px solid #29415d;background:#0b192a;border-radius:12px}.subject-card .sname{font-size:10px;color:var(--muted);text-transform:uppercase}.subject-card .sval{font-size:19px;font-weight:950;margin-top:3px}.subject-card .scount{font-size:10px;color:#9fb0c7;margin-top:2px}
+.academic-card{padding:17px}.academic-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.trend-up{color:#79e7aa}.trend-down{color:#ff9d9d}.trend-flat{color:#c6d5e6}.coverage{color:#9fb0c7;font-size:11px}.eval-history-list{margin-top:11px}.eval-history-row{display:grid;grid-template-columns:95px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)}.eval-history-row:first-child{border-top:0}.eval-history-row .date{font-size:10px;color:var(--muted)}.eval-history-row .title{font-size:12px;font-weight:800}.eval-history-row .subj{font-size:10px;color:#9fb0c7}.eval-history-row .pct{font-size:13px;font-weight:950;color:#b8efca}
+.metric-select{min-width:175px}.rank-note{font-size:11px;color:#9fb0c7;padding:0 2px}.coverage-pill{display:inline-block;padding:3px 6px;border-radius:999px;border:1px solid #35506b;color:#b8c8db;font-size:9px;margin-top:3px}
+@media(max-width:950px){.eval-grid{grid-template-columns:1fr}.subject-cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.subject-cards{grid-template-columns:1fr}.eval-history-row{grid-template-columns:70px 1fr auto}}
+
 </style>
 </head>
 <body>
@@ -148,7 +167,7 @@ button{cursor:pointer}
 <div class="app" id="appRoot" style="display:none">
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="brand"><div class="logo">Σ</div><div><h1>Panel de Selección Académica</h1><small>Terceros · Diagnóstico inicial de Matemáticas</small></div></div>
+    <div class="brand"><div class="logo">Σ</div><div><h1>Panel de Selección Académica</h1><small>Terceros · Selección, seguimiento y evaluaciones</small></div></div>
     <div class="userbar">
       <div id="syncPill" class="sync-pill"><span class="sync-dot"></span><span id="syncText">Conectando…</span></div>
       <div id="userEmail" class="user-email"></div>
@@ -158,40 +177,42 @@ button{cursor:pointer}
 </header>
 
 <main class="shell">
-  <div class="banner"><strong>Ranking provisional.</strong> En esta primera versión el orden se basa únicamente en el diagnóstico inicial de Matemáticas. Las evaluaciones de Química, Física, Biología, Español y los simulacros se incorporarán después. El seguimiento cotidiano se registra aparte y no altera este ranking.</div>
+  <div class="banner"><strong>Ranking académico dinámico.</strong> El diagnóstico inicial cuenta como la primera evaluación de Matemáticas. Cada nueva evaluación académica actualiza el desempeño de su materia y el ranking general. El seguimiento cotidiano continúa separado y no modifica la clasificación.</div>
 
   <nav class="tabs">
     <button class="tab active" data-view="inicio">Resumen</button>
     <button class="tab" data-view="alumno">Alumno</button>
     <button class="tab" data-view="ranking">Ranking</button>
     <button class="tab" data-view="seleccion">Selección</button>
+    <button class="tab" data-view="evaluaciones">Evaluaciones</button>
     <button class="tab" data-view="seguimiento">Seguimiento</button>
   </nav>
 
   <section id="inicio" class="view active">
     <div class="grid4">
       <div class="card stat"><div class="label">Alumnos evaluados</div><div class="num" id="statTotal">—</div><div class="sub">3.º A a 3.º F</div></div>
-      <div class="card stat"><div class="label">Mejor resultado</div><div class="num" id="statBest">—</div><div class="sub">Diagnóstico de 12 reactivos</div></div>
-      <div class="card stat"><div class="label">Corte Top 5</div><div class="num" id="statCut">—</div><div class="sub">Resultado del 5.º lugar provisional</div></div>
-      <div class="card stat"><div class="label">Promedio generación</div><div class="num" id="statAvg">—</div><div class="sub">Todos los terceros</div></div>
+      <div class="card stat"><div class="label">Mejor índice actual</div><div class="num" id="statBest">—</div><div class="sub">Rendimiento académico acumulado</div></div>
+      <div class="card stat"><div class="label">Corte Top 5</div><div class="num" id="statCut">—</div><div class="sub">Índice actual del 5.º lugar</div></div>
+      <div class="card stat"><div class="label">Evaluaciones nuevas</div><div class="num" id="statAvg">—</div><div class="sub">Además del diagnóstico inicial</div></div>
     </div>
 
     <div class="section">
-      <div class="section-title"><div><h2>Top 5 provisional</h2><p>Primeros candidatos según el diagnóstico de Matemáticas.</p></div></div>
+      <div class="section-title"><div><h2>Top 5 académico actual</h2><p>Se actualiza automáticamente conforme agregas evidencia académica.</p></div></div>
       <div class="top5" id="top5"></div>
     </div>
 
     <div class="section">
-      <div class="section-title"><div><h2>Destacados por grupo</h2><p>Los tres mejores resultados de cada salón.</p></div></div>
+      <div class="section-title"><div><h2>Destacados por grupo</h2><p>Los tres mejores índices académicos actuales de cada salón.</p></div></div>
       <div class="group-leaders" id="groupLeaders"></div>
     </div>
 
     <div class="section card" style="padding:18px">
-      <div class="section-title"><div><h2>Cómo se ordena el ranking</h2><p>Regla sencilla y transparente para esta primera etapa.</p></div></div>
+      <div class="section-title"><div><h2>Cómo se calcula el ranking</h2><p>La regla seguirá siendo transparente conforme incorporemos más materias.</p></div></div>
       <div class="tiny" style="font-size:13px;color:#c5d4e5">
-        <strong>1.</strong> Primero se ordena por número de aciertos (máximo 12). 
-        <strong>2.</strong> Si dos alumnos empatan, se favorece a quien acertó reactivos que resultaron más difíciles para la generación. 
-        <strong>3.</strong> Este desempate solo ordena empates; nunca vale más que un acierto adicional.
+        <strong>1.</strong> El diagnóstico inicial cuenta como una evaluación de Matemáticas. 
+        <strong>2.</strong> Dentro de cada materia se promedian sus evaluaciones disponibles. 
+        <strong>3.</strong> El índice general es el promedio de las materias para las que cada alumno ya tiene evidencia. 
+        <strong>4.</strong> La ficha y el ranking muestran la cobertura de evidencia para interpretar correctamente posiciones todavía provisionales.
       </div>
     </div>
   </section>
@@ -211,6 +232,14 @@ button{cursor:pointer}
           <div class="card box"><h3>Aprendizajes por reforzar</h3><div class="chips" id="weaknesses"></div><div id="pendingWrap" style="margin-top:9px"></div></div>
         </div>
         <div class="card box section"><h3>Detalle de los 12 reactivos</h3><div class="reactivos" id="reactivos"></div></div>
+        <div class="card academic-card section">
+          <div class="academic-head">
+            <div><div class="eyebrow">Evolución académica</div><h3 style="margin:4px 0 4px">Índice actual y nuevas evaluaciones</h3><div id="academicTrendText" class="tiny"></div></div>
+            <div style="text-align:right"><div id="academicIndexBig" style="font-size:27px;font-weight:1000;color:#9ef0bf">—</div><div class="tiny">índice general</div></div>
+          </div>
+          <div id="studentSubjectCards" class="subject-cards"></div>
+          <div class="eval-history-list"><h3 style="font-size:14px;margin:15px 0 4px">Historial académico</h3><div id="studentEvalHistory"></div></div>
+        </div>
         <div class="card box section">
           <div class="section-title">
             <div><h2 style="font-size:17px">Seguimiento cotidiano</h2><p>No modifica el ranking académico; registra hábitos, cumplimiento y preparación.</p></div>
@@ -262,11 +291,20 @@ button{cursor:pointer}
         <option value="ALL">Todos los terceros</option>
         <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
       </select>
-      <input type="search" id="rankSearch" placeholder="Buscar alumno..." style="min-width:280px">
+      <select class="select metric-select" id="rankMetric">
+        <option value="GENERAL">Índice general</option>
+        <option value="Matemáticas">Matemáticas</option>
+        <option value="Química">Química</option>
+        <option value="Física">Física</option>
+        <option value="Biología">Biología</option>
+        <option value="Español">Español</option>
+      </select>
+      <input type="search" id="rankSearch" placeholder="Buscar alumno..." style="min-width:250px">
       <button class="secondary" id="exportCsv">Exportar ranking CSV</button>
     </div>
+    <div class="rank-note section">En materias sin datos solo aparecen alumnos que ya tienen alguna evaluación registrada. En el índice general se muestra la cobertura de materias con evidencia.</div>
     <div class="section table-wrap"><table>
-      <thead><tr><th>Pos.</th><th>Alumno</th><th>Grupo</th><th>Aciertos</th><th>Arit.</th><th>Geom.</th><th>Álgebra</th><th>Estado</th></tr></thead>
+      <thead><tr><th>Pos.</th><th>Alumno</th><th>Grupo</th><th>Índice</th><th>Diagnóstico</th><th>Mat.</th><th>Quím.</th><th>Fís.</th><th>Bio.</th><th>Esp.</th><th>Δ vs inicial</th><th>Estado</th></tr></thead>
       <tbody id="rankBody"></tbody>
     </table></div>
   </section>
@@ -275,7 +313,7 @@ button{cursor:pointer}
     <div class="selection-grid">
       <div class="card selection-card">
         <h3>Top 5 automático</h3>
-        <div class="tiny" style="margin-bottom:8px">Se actualiza con el ranking matemático. Todavía no equivale a la selección definitiva.</div>
+        <div class="tiny" style="margin-bottom:8px">Se actualiza con el índice académico general. Sigue siendo una referencia para tu decisión docente.</div>
         <div class="selection-list" id="autoTop"></div>
         <h3 style="margin-top:20px">Reservas automáticas · lugares 6–8</h3>
         <div class="selection-list" id="autoReserve"></div>
@@ -287,6 +325,43 @@ button{cursor:pointer}
     </div>
   </section>
 
+
+
+  <section id="evaluaciones" class="view">
+    <div class="eval-grid">
+      <div class="card eval-form">
+        <div class="eyebrow">Nueva evidencia académica</div>
+        <h3>Crear evaluación</h3>
+        <div class="tiny">Puedes registrar retos, exámenes, simulacros o diagnósticos de cualquier materia. Los espacios en blanco no cuentan como cero.</div>
+        <label class="eval-field"><span>Materia</span><select id="evalSubject"><option>Matemáticas</option><option>Química</option><option>Física</option><option>Biología</option><option>Español</option></select></label>
+        <label class="eval-field"><span>Nombre de la evaluación</span><input id="evalTitle" type="text" placeholder="Ej. Reto Matemático 1"></label>
+        <label class="eval-field"><span>Fecha</span><input id="evalDate" type="date"></label>
+        <label class="eval-field"><span>Puntaje máximo</span><input id="evalMax" type="number" min="0.01" step="0.01" value="10"></label>
+        <button id="createEvaluation" class="primary" type="button" style="width:100%;margin-top:6px">Crear y capturar resultados</button>
+        <div id="evalCreateMsg" class="tiny" style="margin-top:8px"></div>
+      </div>
+      <div class="card eval-list-card">
+        <div class="section-title"><div><h2 style="font-size:18px">Evaluaciones registradas</h2><p>El diagnóstico inicial de Matemáticas está integrado automáticamente y no aparece en esta lista.</p></div></div>
+        <div id="evalStats" class="track-summary"></div>
+        <div id="evaluationList" class="eval-list"></div>
+      </div>
+    </div>
+
+    <div id="evaluationCapture" class="card eval-capture hidden">
+      <div class="eval-capture-head">
+        <div><div class="eyebrow" id="captureSubject">Materia</div><h3 id="captureTitle">Captura de resultados</h3><div class="meta" id="captureMeta"></div></div>
+        <button id="closeCapture" class="secondary" type="button">Cerrar captura</button>
+      </div>
+      <div class="card controls" style="box-shadow:none;margin-top:12px">
+        <select class="select" id="captureGroup"><option value="ALL">Todos los terceros</option><option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option></select>
+        <input id="captureSearch" type="search" placeholder="Buscar alumno..." style="min-width:260px">
+        <button id="saveScores" class="primary" type="button">Guardar resultados</button>
+      </div>
+      <div id="captureProgress" class="eval-progress"></div>
+      <div class="table-wrap"><table><thead><tr><th>Alumno</th><th>Grupo</th><th>Puntaje</th><th>Porcentaje</th><th>Ranking inicial</th></tr></thead><tbody id="scoreCaptureBody"></tbody></table></div>
+      <div class="follow-savebar" style="padding-left:0;padding-right:0"><div><strong id="scoreSaveTitle">Sin cambios pendientes</strong><div id="scoreSaveMsg" class="tiny">Deja en blanco a quien todavía no haya realizado esta evaluación.</div></div><button id="saveScoresBottom" class="primary" type="button">Guardar resultados</button></div>
+    </div>
+  </section>
 
   <section id="seguimiento" class="view">
     <div class="card controls">
@@ -341,7 +416,7 @@ button{cursor:pointer}
     </div>
   </section>
 
-  <div class="footer">Panel docente privado · Versión 3 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
+  <div class="footer">Panel docente privado · Versión 4 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
 </main>
 </div>
 
@@ -382,7 +457,11 @@ let notes = {};
 let currentUser = null;
 let unsubscribeCloud = null;
 let unsubscribeTracking = null;
+let unsubscribeEvaluations = null;
 let appInitialized = false;
+let evaluations = {};
+let currentEvaluationId = null;
+let evalCaptureDirty = false;
 let trackingSessions = {};
 let trackingDirty = false;
 
@@ -431,8 +510,12 @@ function refreshCloudDependentViews(){
   if(!appInitialized)return;
   const s=currentStudent();
   if(s) renderStudent(s.id);
+  renderHome();
   renderRanking();
   renderSelection();
+  renderEvaluationList();
+  renderEvalStats();
+  if(currentEvaluationId && !evalCaptureDirty) renderScoreCapture();
   renderTrackingTable();
   renderGroupFollowSummary();
 }
@@ -499,6 +582,65 @@ function followSummary(studentId){
   return out;
 }
 
+
+const subjects=["Matemáticas","Química","Física","Biología","Español"];
+
+async function loadEvaluations(user){
+  const ref=collection(firestore,"users",user.uid,"evaluations");
+  const initial=await getDocs(ref);
+  evaluations={};
+  initial.forEach(d=>evaluations[d.id]={id:d.id,...d.data()});
+  if(unsubscribeEvaluations)unsubscribeEvaluations();
+  unsubscribeEvaluations=onSnapshot(ref,snap=>{
+    const next={};
+    snap.forEach(d=>next[d.id]={id:d.id,...d.data()});
+    evaluations=next;
+    if(!evalCaptureDirty) refreshCloudDependentViews();
+  },err=>{console.error(err);setSyncStatus("Error en evaluaciones","error");});
+}
+function actualEvaluations(){
+  return Object.values(evaluations).sort((a,b)=>(b.date||"").localeCompare(a.date||"") || (a.title||"").localeCompare(b.title||"","es"));
+}
+function studentEvalRecords(studentId,subject=null){
+  return actualEvaluations().filter(e=>!subject||e.subject===subject).flatMap(e=>{
+    const raw=e.scores?.[studentId];
+    const score=(raw===0||raw)?Number(raw):null;
+    const max=Number(e.maxScore||0);
+    if(score===null||!Number.isFinite(score)||!max)return [];
+    return [{id:e.id,title:e.title,subject:e.subject,date:e.date,maxScore:max,score,pct:score/max*100}];
+  });
+}
+function subjectAverage(student,subject){
+  const vals=[];
+  if(subject==="Matemáticas")vals.push(stats(student).pct);
+  studentEvalRecords(student.id,subject).forEach(r=>vals.push(r.pct));
+  if(!vals.length)return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function academicProfile(student){
+  const bySubject={};
+  subjects.forEach(sub=>bySubject[sub]=subjectAverage(student,sub));
+  const available=subjects.filter(sub=>bySubject[sub]!==null);
+  const general=available.length?available.reduce((sum,sub)=>sum+bySubject[sub],0)/available.length:null;
+  return {general,bySubject,coverage:available.length,actualCount:studentEvalRecords(student.id).length};
+}
+function academicMetric(student,metric="GENERAL"){
+  const p=academicProfile(student);
+  return metric==="GENERAL"?p.general:p.bySubject[metric];
+}
+function academicRanked(list,metric="GENERAL"){
+  return [...list].filter(s=>academicMetric(s,metric)!==null).sort((a,b)=>{
+    const A=academicMetric(a,metric),B=academicMetric(b,metric);
+    const da=stats(a),db=stats(b);
+    return B-A || db.correct-da.correct || db.hard-da.hard || groupOrder.indexOf(a.group)-groupOrder.indexOf(b.group) || a.name.localeCompare(b.name,"es");
+  });
+}
+function currentGenRank(){return academicRanked(students,"GENERAL");}
+function currentRankMap(){return Object.fromEntries(currentGenRank().map((s,i)=>[s.id,i+1]));}
+function currentGroupRankMap(){
+  const m={};groupOrder.forEach(g=>academicRanked(students.filter(s=>s.group===g),"GENERAL").forEach((s,i)=>m[s.id]=i+1));return m;
+}
+
 async function loadCloudState(user){
   const ref=collection(firestore,"users",user.uid,"studentState");
   const initial=await getDocs(ref);
@@ -562,11 +704,11 @@ function ranked(list){
     return B.correct-A.correct || B.hard-A.hard || groupOrder.indexOf(a.group)-groupOrder.indexOf(b.group) || a.name.localeCompare(b.name,"es");
   });
 }
-const genRank = ranked(students);
-const rankMap = Object.fromEntries(genRank.map((s,i)=>[s.id,i+1]));
-const groupRankMap={};
+const initialGenRank = ranked(students);
+const initialRankMap = Object.fromEntries(initialGenRank.map((s,i)=>[s.id,i+1]));
+const initialGroupRankMap={};
 groupOrder.forEach(g=>{
-  ranked(students.filter(s=>s.group===g)).forEach((s,i)=>groupRankMap[s.id]=i+1);
+  ranked(students.filter(s=>s.group===g)).forEach((s,i)=>initialGroupRankMap[s.id]=i+1);
 });
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function shortName(n){return n.replace(" * "," · ")}
@@ -783,28 +925,130 @@ function handleTrackingError(err){
   if(im)im.textContent="No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.";
 }
 
-function renderHome(){
-  const ss=students.map(stats);
-  const avg=ss.reduce((a,b)=>a+b.correct,0)/students.length;
-  document.getElementById("statTotal").textContent=students.length;
-  document.getElementById("statBest").textContent=`${genRank[0] ? stats(genRank[0]).correct : 0}/12`;
-  document.getElementById("statCut").textContent=`${genRank[4] ? stats(genRank[4]).correct : 0}/12`;
-  document.getElementById("statAvg").textContent=`${avg.toFixed(2)}/12`;
 
-  document.getElementById("top5").innerHTML=genRank.slice(0,5).map((s,i)=>{
-    const st=stats(s);
-    return `<div class="card rank-card clickable" data-open="${s.id}">
-      <div class="medal">Lugar provisional</div><div class="place">#${i+1}</div>
-      <div class="nm">${esc(shortName(s.name))}</div><div class="grp">${s.group}</div>
-      <div class="scorebig">${st.correct}/12 · ${st.pct.toFixed(1)}%</div>
-    </div>`;
+function evalId(){
+  return `ev_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+}
+function renderEvalStats(){
+  const el=document.getElementById("evalStats");if(!el)return;
+  const evs=actualEvaluations();
+  const subj=new Set(evs.map(e=>e.subject));
+  const latest=evs[0];
+  const scored=evs.reduce((sum,e)=>sum+Object.keys(e.scores||{}).filter(id=>e.scores[id]!==""&&e.scores[id]!==null&&e.scores[id]!==undefined).length,0);
+  el.innerHTML=`<div class="track-metric"><div class="tm-label">Evaluaciones</div><div class="tm-value">${evs.length}</div><div class="tm-sub">nuevas evidencias</div></div><div class="track-metric"><div class="tm-label">Materias</div><div class="tm-value">${subj.size}</div><div class="tm-sub">con evaluaciones nuevas</div></div><div class="track-metric"><div class="tm-label">Resultados</div><div class="tm-value">${scored}</div><div class="tm-sub">puntajes capturados</div></div><div class="track-metric"><div class="tm-label">Última fecha</div><div class="tm-value" style="font-size:15px">${latest?formatTrackDate(latest.date):"—"}</div><div class="tm-sub">evaluación más reciente</div></div>`;
+}
+function renderEvaluationList(){
+  const el=document.getElementById("evaluationList");if(!el)return;
+  const evs=actualEvaluations();
+  if(!evs.length){el.innerHTML=`<div class="empty">Todavía no has creado evaluaciones adicionales. El diagnóstico inicial de Matemáticas ya forma parte del índice académico.</div>`;return;}
+  el.innerHTML=evs.map(e=>{
+    const count=Object.values(e.scores||{}).filter(v=>v===0||v).length;
+    return `<div class="eval-row"><div><div class="eval-row-title">${esc(e.title||"Evaluación")}</div><div class="eval-row-meta">${esc(e.subject||"")} · ${formatTrackDate(e.date)} · máximo ${Number(e.maxScore||0)} · ${count} resultados</div></div><div class="eval-actions"><button class="secondary open-eval" data-eval="${e.id}" type="button">Capturar</button><button class="dangerlink delete-eval" data-eval="${e.id}" type="button">Eliminar</button></div></div>`;
+  }).join("");
+}
+async function createEvaluation(){
+  if(!currentUser)return;
+  const subject=document.getElementById("evalSubject").value;
+  const title=document.getElementById("evalTitle").value.trim();
+  const date=document.getElementById("evalDate").value||localDateISO();
+  const maxScore=Number(document.getElementById("evalMax").value);
+  const msg=document.getElementById("evalCreateMsg");
+  if(!title){msg.textContent="Escribe un nombre para la evaluación.";return;}
+  if(!Number.isFinite(maxScore)||maxScore<=0){msg.textContent="El puntaje máximo debe ser mayor que cero.";return;}
+  const id=evalId();setSyncStatus("Creando evaluación…","busy");msg.textContent="Guardando…";
+  await setDoc(doc(firestore,"users",currentUser.uid,"evaluations",id),{title,subject,date,maxScore,scores:{},createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+  evaluations[id]={id,title,subject,date,maxScore,scores:{}};
+  currentEvaluationId=id;evalCaptureDirty=false;msg.textContent="Evaluación creada.";document.getElementById("evalTitle").value="";setSyncStatus("Sincronizado");
+  renderEvaluationList();renderEvalStats();openEvaluation(id);
+}
+function openEvaluation(id){
+  const e=evaluations[id];if(!e)return;
+  currentEvaluationId=id;evalCaptureDirty=false;
+  document.getElementById("evaluationCapture").classList.remove("hidden");
+  document.getElementById("captureSubject").textContent=e.subject||"Materia";
+  document.getElementById("captureTitle").textContent=e.title||"Evaluación";
+  document.getElementById("captureMeta").textContent=`${formatTrackDate(e.date)} · Puntaje máximo: ${e.maxScore}`;
+  document.getElementById("captureGroup").value="ALL";document.getElementById("captureSearch").value="";
+  renderScoreCapture();document.getElementById("evaluationCapture").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeEvaluationCapture(){currentEvaluationId=null;evalCaptureDirty=false;document.getElementById("evaluationCapture").classList.add("hidden");}
+function captureVisibleStudents(){
+  const g=document.getElementById("captureGroup")?.value||"ALL";const q=(document.getElementById("captureSearch")?.value||"").trim().toLowerCase();
+  return students.filter(s=>(g==="ALL"||s.group===g)&&(!q||s.name.toLowerCase().includes(q))).sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name,"es"));
+}
+function renderScoreCapture(){
+  const e=evaluations[currentEvaluationId];if(!e)return;
+  const list=captureVisibleStudents();const body=document.getElementById("scoreCaptureBody");
+  body.innerHTML=list.map(s=>{
+    const raw=e.scores?.[s.id];const val=(raw===0||raw)?raw:"";const pct=val!==""?Number(val)/Number(e.maxScore)*100:null;
+    return `<tr data-score-student="${s.id}"><td><strong>${esc(shortName(s.name))}</strong></td><td>${s.group}</td><td><input class="score-input" type="number" min="0" max="${Number(e.maxScore)}" step="0.01" value="${val}"></td><td class="score-pct">${pct===null?"—":pct.toFixed(1)+"%"}</td><td>#${initialRankMap[s.id]}</td></tr>`;
+  }).join("")||`<tr><td colspan="5" class="empty">Sin alumnos para este filtro.</td></tr>`;
+  body.querySelectorAll(".score-input").forEach(inp=>inp.addEventListener("input",()=>{const n=Number(inp.value),max=Number(e.maxScore);inp.closest("tr").querySelector(".score-pct").textContent=inp.value===""?"—":Number.isFinite(n)?(n/max*100).toFixed(1)+"%":"—";evalCaptureDirty=true;updateEvalDirtyLabel();}));
+  updateCaptureProgress();updateEvalDirtyLabel();
+}
+function updateCaptureProgress(){
+  const e=evaluations[currentEvaluationId];const el=document.getElementById("captureProgress");if(!e||!el)return;
+  const vals=Object.values(e.scores||{}).filter(v=>v===0||v);const pcts=vals.map(v=>Number(v)/Number(e.maxScore)*100).filter(Number.isFinite);const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
+  el.innerHTML=`<span class="badge blue">${vals.length} resultados guardados</span><span class="badge green">Promedio ${avg===null?"—":avg.toFixed(1)+"%"}</span><span class="badge amber">Máximo ${e.maxScore}</span>`;
+}
+function updateEvalDirtyLabel(){const x=document.getElementById("scoreSaveTitle");if(x)x.textContent=evalCaptureDirty?"Cambios pendientes de guardar":"Sin cambios pendientes";}
+async function saveEvaluationScores(){
+  const e=evaluations[currentEvaluationId];if(!e||!currentUser)return;
+  const scores={...(e.scores||{})};let invalid=false;
+  document.querySelectorAll("#scoreCaptureBody tr[data-score-student]").forEach(tr=>{const input=tr.querySelector(".score-input");const id=tr.dataset.scoreStudent;if(input.value===""){delete scores[id];return;}const n=Number(input.value);if(!Number.isFinite(n)||n<0||n>Number(e.maxScore)){invalid=true;input.style.borderColor="#ff7c7c";return;}input.style.borderColor="";scores[id]=n;});
+  if(invalid){document.getElementById("scoreSaveMsg").textContent="Hay puntajes inválidos o mayores al máximo.";return;}
+  setSyncStatus("Guardando evaluación…","busy");document.getElementById("scoreSaveMsg").textContent="Guardando resultados…";
+  await setDoc(doc(firestore,"users",currentUser.uid,"evaluations",e.id),{scores,updatedAt:serverTimestamp()},{merge:true});
+  evaluations[e.id]={...e,scores};evalCaptureDirty=false;updateEvalDirtyLabel();document.getElementById("scoreSaveMsg").textContent="Resultados guardados y ranking actualizado.";setSyncStatus("Sincronizado");refreshCloudDependentViews();
+}
+async function deleteEvaluation(id){
+  const e=evaluations[id];if(!e||!currentUser)return;
+  if(!confirm(`¿Eliminar “${e.title}”? Esta acción borrará sus resultados y actualizará el ranking.`))return;
+  await deleteDoc(doc(firestore,"users",currentUser.uid,"evaluations",id));if(currentEvaluationId===id)closeEvaluationCapture();
+}
+function handleEvaluationError(err){
+  console.error(err);setSyncStatus("Error en evaluación","error");
+  const a=document.getElementById("evalCreateMsg"),b=document.getElementById("scoreSaveMsg");
+  if(a)a.textContent="No se pudo completar la operación. Revisa tu conexión e inténtalo de nuevo.";
+  if(b)b.textContent="No se pudo guardar la evaluación. Revisa tu conexión e inténtalo de nuevo.";
+}
+function setupEvaluationControls(){
+  const d=document.getElementById("evalDate");if(d&&!d.value)d.value=localDateISO();
+  document.getElementById("createEvaluation")?.addEventListener("click",()=>createEvaluation().catch(handleEvaluationError));
+  document.getElementById("closeCapture")?.addEventListener("click",closeEvaluationCapture);
+  document.getElementById("captureGroup")?.addEventListener("change",()=>{if(!evalCaptureDirty)renderScoreCapture();else if(confirm("Hay cambios sin guardar. ¿Descartarlos para cambiar el filtro?")){evalCaptureDirty=false;renderScoreCapture();}});
+  document.getElementById("captureSearch")?.addEventListener("input",()=>{if(!evalCaptureDirty)renderScoreCapture();else document.getElementById("scoreSaveMsg").textContent="Guarda los cambios antes de usar el buscador.";});
+  document.getElementById("saveScores")?.addEventListener("click",()=>saveEvaluationScores().catch(handleEvaluationError));
+  document.getElementById("saveScoresBottom")?.addEventListener("click",()=>saveEvaluationScores().catch(handleEvaluationError));
+  document.addEventListener("click",e=>{const open=e.target.closest(".open-eval");if(open)openEvaluation(open.dataset.eval);const del=e.target.closest(".delete-eval");if(del)deleteEvaluation(del.dataset.eval).catch(handleEvaluationError);});
+}
+function trendForStudent(s){
+  const current=currentRankMap()[s.id];const initial=initialRankMap[s.id];if(!current||!initial)return {delta:0,text:"—",cls:"trend-flat"};const delta=initial-current;return {delta,text:delta>0?`↑ ${delta}`:delta<0?`↓ ${Math.abs(delta)}`:"=",cls:delta>0?"trend-up":delta<0?"trend-down":"trend-flat"};
+}
+function renderStudentAcademic(studentId){
+  const s=students.find(x=>x.id===studentId);if(!s)return;const p=academicProfile(s);const tr=trendForStudent(s);const current=currentRankMap()[s.id];
+  document.getElementById("academicIndexBig").textContent=p.general===null?"—":p.general.toFixed(1)+"%";
+  document.getElementById("academicTrendText").innerHTML=`Ranking inicial: <strong>#${initialRankMap[s.id]}</strong> · actual: <strong>#${current}</strong> · cambio: <strong class="${tr.cls}">${tr.text}</strong> · cobertura: <strong>${p.coverage}/5 materias</strong>`;
+  document.getElementById("studentSubjectCards").innerHTML=subjects.map(sub=>{const v=p.bySubject[sub];const count=(sub==="Matemáticas"?1:0)+studentEvalRecords(s.id,sub).length;return `<div class="subject-card"><div class="sname">${sub}</div><div class="sval">${v===null?"—":v.toFixed(1)+"%"}</div><div class="scount">${count?count+" evidencia"+(count===1?"":"s"):"sin datos"}</div></div>`;}).join("");
+  const hist=[{title:"Diagnóstico inicial de Matemáticas",subject:"Matemáticas",date:"2026-09-01",dateLabel:"Inicio de curso",pct:stats(s).pct,score:stats(s).correct,maxScore:12},...studentEvalRecords(s.id)].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  document.getElementById("studentEvalHistory").innerHTML=hist.map(r=>`<div class="eval-history-row"><div class="date">${r.dateLabel||formatTrackDate(r.date)}</div><div><div class="title">${esc(r.title)}</div><div class="subj">${esc(r.subject)} · ${r.score}/${r.maxScore}</div></div><div class="pct">${r.pct.toFixed(1)}%</div></div>`).join("");
+}
+
+function renderHome(){
+  const rank=currentGenRank();
+  document.getElementById("statTotal").textContent=students.length;
+  document.getElementById("statBest").textContent=rank[0]?academicProfile(rank[0]).general.toFixed(1)+"%":"—";
+  document.getElementById("statCut").textContent=rank[4]?academicProfile(rank[4]).general.toFixed(1)+"%":"—";
+  document.getElementById("statAvg").textContent=actualEvaluations().length;
+
+  document.getElementById("top5").innerHTML=rank.slice(0,5).map((s,i)=>{
+    const p=academicProfile(s),tr=trendForStudent(s);
+    return `<div class="card rank-card clickable" data-open="${s.id}"><div class="medal">Lugar actual</div><div class="place">#${i+1}</div><div class="nm">${esc(shortName(s.name))}</div><div class="grp">${s.group} · <span class="${tr.cls}">${tr.text}</span></div><div class="scorebig">${p.general.toFixed(1)}% · ${p.coverage}/5 materias · ${p.actualCount+1} evid.</div></div>`;
   }).join("");
 
   document.getElementById("groupLeaders").innerHTML=groupOrder.map(g=>{
-    const top=ranked(students.filter(s=>s.group===g)).slice(0,3);
-    return `<div class="card leader"><h3>${g}</h3>${top.map((s,i)=>`<div class="minirow clickable" data-open="${s.id}">
-      <div class="pos">#${i+1}</div><div class="name">${esc(shortName(s.name))}</div><div class="pts">${stats(s).correct}/12</div>
-    </div>`).join("")}</div>`;
+    const top=academicRanked(students.filter(s=>s.group===g),"GENERAL").slice(0,3);
+    return `<div class="card leader"><h3>${g}</h3>${top.map((s,i)=>`<div class="minirow clickable" data-open="${s.id}"><div class="pos">#${i+1}</div><div class="name">${esc(shortName(s.name))}</div><div class="pts">${academicProfile(s).general.toFixed(1)}%</div></div>`).join("")}</div>`;
   }).join("");
 }
 
@@ -832,7 +1076,7 @@ function openStudent(id){
 function renderStudent(id){
   const s=students.find(x=>x.id===id);if(!s)return;
   const st=stats(s);
-  const place=rankMap[s.id], gp=groupRankMap[s.id];
+  const place=currentRankMap()[s.id], gp=currentGroupRankMap()[s.id];
   document.getElementById("profile").innerHTML=`
     <div class="profile-top">
       <div><div class="eyebrow">${s.group} · Ranking generación #${place}</div>
@@ -861,6 +1105,7 @@ function renderStudent(id){
   document.querySelectorAll(".statusbtn").forEach(b=>b.classList.toggle("active",marks[s.id]===b.dataset.status));
   document.getElementById("studentNote").value=notes[s.id]||"";
   document.getElementById("saveMsg").textContent="";
+  renderStudentAcademic(s.id);
   renderIndividualTracking(s.id);
 }
 function currentStudent(){
@@ -922,44 +1167,39 @@ document.getElementById("nextStudent").onclick=()=>moveStudent(1);
 
 function renderRanking(){
   const g=document.getElementById("rankGroup").value;
+  const metric=document.getElementById("rankMetric").value;
   const q=document.getElementById("rankSearch").value.trim().toLowerCase();
-  let list=g==="ALL"?genRank:ranked(students.filter(s=>s.group===g));
+  const base=g==="ALL"?students:students.filter(s=>s.group===g);
+  let list=academicRanked(base,metric);
   if(q)list=list.filter(s=>s.name.toLowerCase().includes(q));
-  document.getElementById("rankBody").innerHTML=list.map((s,i)=>{
-    const st=stats(s), global=g==="ALL", pos=global?rankMap[s.id]:groupRankMap[s.id];
-    const m=marks[s.id]||"";
-    const cut=global && pos===6 ? "cut":"";
-    return `<tr class="clickable ${cut}" data-open="${s.id}">
-      <td><span class="rankpos">#${pos}</span></td>
-      <td><strong>${esc(shortName(s.name))}</strong></td><td>${s.group}</td>
-      <td class="num">${st.correct}/12<br><span class="muted">${st.pct.toFixed(1)}%</span></td>
-      <td class="num">${st.arit}/4</td><td class="num">${st.geo}/4</td><td class="num">${st.alg}/4</td>
-      <td>${m?`<span class="status-dot ${markClass(m)}"></span>${esc(m)}`:"—"}</td>
-    </tr>`;
-  }).join("") || `<tr><td colspan="8" class="empty">Sin resultados.</td></tr>`;
+  const positionMap=Object.fromEntries(academicRanked(base,metric).map((s,i)=>[s.id,i+1]));
+  document.getElementById("rankBody").innerHTML=list.map(s=>{
+    const p=academicProfile(s),pos=positionMap[s.id],m=marks[s.id]||"",tr=trendForStudent(s),metricVal=academicMetric(s,metric);
+    const vals=subjects.map(sub=>p.bySubject[sub]);
+    const cut=g==="ALL"&&metric==="GENERAL"&&pos===6?"cut":"";
+    return `<tr class="clickable ${cut}" data-open="${s.id}"><td><span class="rankpos">#${pos}</span></td><td><strong>${esc(shortName(s.name))}</strong><br><span class="coverage-pill">${p.coverage}/5 materias · ${p.actualCount+1} evid.</span></td><td>${s.group}</td><td class="num">${metricVal.toFixed(1)}%</td><td class="num">${stats(s).pct.toFixed(1)}%</td>${vals.map(v=>`<td class="num">${v===null?"—":v.toFixed(1)+"%"}</td>`).join("")}<td class="num ${tr.cls}">${metric==="GENERAL"?tr.text:"—"}</td><td>${m?`<span class="status-dot ${markClass(m)}"></span>${esc(m)}`:"—"}</td></tr>`;
+  }).join("")||`<tr><td colspan="12" class="empty">Sin alumnos con evidencia para este filtro.</td></tr>`;
 }
 document.getElementById("rankGroup").onchange=renderRanking;
+document.getElementById("rankMetric").onchange=renderRanking;
 document.getElementById("rankSearch").oninput=renderRanking;
 
 function renderSelection(){
-  const row=s=>{const st=stats(s);return `<div class="selrow clickable" data-open="${s.id}"><div class="p">#${rankMap[s.id]}</div><div><div class="n">${esc(shortName(s.name))}</div><div class="g">${s.group}</div></div><div class="s">${st.correct}/12</div></div>`}
-  document.getElementById("autoTop").innerHTML=genRank.slice(0,5).map(row).join("");
-  document.getElementById("autoReserve").innerHTML=genRank.slice(5,8).map(row).join("");
-  const picked=genRank.filter(s=>marks[s.id]);
+  const rank=currentGenRank();const rmap=currentRankMap();
+  const row=s=>{const p=academicProfile(s);return `<div class="selrow clickable" data-open="${s.id}"><div class="p">#${rmap[s.id]}</div><div><div class="n">${esc(shortName(s.name))}</div><div class="g">${s.group} · ${p.coverage}/5 materias</div></div><div class="s">${p.general.toFixed(1)}%</div></div>`}
+  document.getElementById("autoTop").innerHTML=rank.slice(0,5).map(row).join("");
+  document.getElementById("autoReserve").innerHTML=rank.slice(5,8).map(row).join("");
+  const picked=rank.filter(s=>marks[s.id]);
   if(!picked.length){document.getElementById("manualSelection").innerHTML=`<div class="empty">Todavía no has marcado alumnos como observación, candidato, reserva o seleccionado.</div>`;return;}
   const order=["Seleccionado","Candidato","Reserva","Observación"];
-  document.getElementById("manualSelection").innerHTML=order.map(m=>{
-    const arr=picked.filter(s=>marks[s.id]===m);
-    if(!arr.length)return "";
-    return `<div style="margin-bottom:15px"><div class="eyebrow">${m}</div><div class="selection-list">${arr.map(row).join("")}</div></div>`;
-  }).join("");
+  document.getElementById("manualSelection").innerHTML=order.map(m=>{const arr=picked.filter(s=>marks[s.id]===m);if(!arr.length)return "";return `<div style="margin-bottom:15px"><div class="eyebrow">${m}</div><div class="selection-list">${arr.map(row).join("")}</div></div>`;}).join("");
 }
 document.getElementById("exportCsv").onclick=()=>{
-  const rows=[["Posicion","Alumno","Grupo","Aciertos","Porcentaje","Aritmetica","Geometria","Algebra","Estado"]];
-  genRank.forEach(s=>{const st=stats(s);rows.push([rankMap[s.id],s.name,s.group,st.correct,st.pct.toFixed(1),st.arit,st.geo,st.alg,marks[s.id]||""]);});
+  const rank=currentGenRank(),rmap=currentRankMap();
+  const rows=[["Posicion actual","Posicion inicial","Alumno","Grupo","Indice general","Cobertura materias","Diagnostico","Matematicas","Quimica","Fisica","Biologia","Espanol","Estado"]];
+  rank.forEach(s=>{const p=academicProfile(s);rows.push([rmap[s.id],initialRankMap[s.id],s.name,s.group,p.general.toFixed(1),p.coverage,stats(s).pct.toFixed(1),...subjects.map(sub=>p.bySubject[sub]===null?"":p.bySubject[sub].toFixed(1)),marks[s.id]||""]);});
   const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
-  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ranking_terceros_matematicas.csv";a.click();URL.revokeObjectURL(a.href);
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ranking_academico_terceros.csv";a.click();URL.revokeObjectURL(a.href);
 };
 
 function showView(id){
@@ -967,6 +1207,7 @@ function showView(id){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===id));
   if(id==="ranking")renderRanking();
   if(id==="seleccion")renderSelection();
+  if(id==="evaluaciones"){renderEvaluationList();renderEvalStats();}
   if(id==="seguimiento"){renderTrackingTable();renderGroupFollowSummary();}
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
@@ -1007,7 +1248,8 @@ onAuthStateChanged(auth,async(user)=>{
     currentUser=null;
     if(unsubscribeCloud){unsubscribeCloud();unsubscribeCloud=null;}
     if(unsubscribeTracking){unsubscribeTracking();unsubscribeTracking=null;}
-    trackingSessions={};
+    if(unsubscribeEvaluations){unsubscribeEvaluations();unsubscribeEvaluations=null;}
+    trackingSessions={};evaluations={};currentEvaluationId=null;
     document.getElementById("appRoot").style.display="none";
     document.getElementById("authGate").style.display="grid";
     document.getElementById("loginPassword").value="";
@@ -1027,11 +1269,14 @@ onAuthStateChanged(auth,async(user)=>{
   setSyncStatus("Cargando…","busy");
 
   try{
-    await Promise.all([loadCloudState(user),loadTrackingSessions(user)]);
+    await Promise.all([loadCloudState(user),loadTrackingSessions(user),loadEvaluations(user)]);
     if(!appInitialized){
       renderHome();
       setupStudentSelectors();
       setupTrackingControls();
+      setupEvaluationControls();
+      renderEvaluationList();
+      renderEvalStats();
       renderRanking();
       renderSelection();
       renderTrackingTable();
