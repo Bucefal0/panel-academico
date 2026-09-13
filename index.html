@@ -353,7 +353,7 @@ button{cursor:pointer}
         <button id="closeCapture" class="secondary" type="button">Cerrar captura</button>
       </div>
       <div class="card controls" style="box-shadow:none;margin-top:12px">
-        <select class="select" id="captureGroup"><option value="ALL">Todos los terceros</option><option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option></select>
+        <select class="select" id="captureGroup"><option value="ALL">Todos los terceros</option><option value="TRACK">Seguimiento · alumnos marcados</option><option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option></select>
         <input id="captureSearch" type="search" placeholder="Buscar alumno..." style="min-width:260px">
         <button id="saveScores" class="primary" type="button">Guardar resultados</button>
       </div>
@@ -416,7 +416,7 @@ button{cursor:pointer}
     </div>
   </section>
 
-  <div class="footer">Panel docente privado · Versión 4 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
+  <div class="footer">Panel docente privado · Versión 4.1 · Firebase Authentication + Cloud Firestore · Sincronización entre dispositivos.</div>
 </main>
 </div>
 
@@ -973,15 +973,19 @@ function openEvaluation(id){
 }
 function closeEvaluationCapture(){currentEvaluationId=null;evalCaptureDirty=false;document.getElementById("evaluationCapture").classList.add("hidden");}
 function captureVisibleStudents(){
-  const g=document.getElementById("captureGroup")?.value||"ALL";const q=(document.getElementById("captureSearch")?.value||"").trim().toLowerCase();
-  return students.filter(s=>(g==="ALL"||s.group===g)&&(!q||s.name.toLowerCase().includes(q))).sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name,"es"));
+  const g=document.getElementById("captureGroup")?.value||"ALL";
+  const q=(document.getElementById("captureSearch")?.value||"").trim().toLowerCase();
+  return students.filter(s=>{
+    const scopeOk = g==="ALL" ? true : g==="TRACK" ? Boolean(marks[s.id]) : s.group===g;
+    return scopeOk && (!q||s.name.toLowerCase().includes(q));
+  }).sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name,"es"));
 }
 function renderScoreCapture(){
   const e=evaluations[currentEvaluationId];if(!e)return;
   const list=captureVisibleStudents();const body=document.getElementById("scoreCaptureBody");
   body.innerHTML=list.map(s=>{
     const raw=e.scores?.[s.id];const val=(raw===0||raw)?raw:"";const pct=val!==""?Number(val)/Number(e.maxScore)*100:null;
-    return `<tr data-score-student="${s.id}"><td><strong>${esc(shortName(s.name))}</strong></td><td>${s.group}</td><td><input class="score-input" type="number" min="0" max="${Number(e.maxScore)}" step="0.01" value="${val}"></td><td class="score-pct">${pct===null?"—":pct.toFixed(1)+"%"}</td><td>#${initialRankMap[s.id]}</td></tr>`;
+    return `<tr data-score-student="${s.id}"><td><strong>${esc(shortName(s.name))}</strong>${marks[s.id]?`<br><span class="coverage-pill"><span class="status-dot ${markClass(marks[s.id])}"></span>${esc(marks[s.id])}</span>`:""}</td><td>${s.group}</td><td><input class="score-input" type="number" min="0" max="${Number(e.maxScore)}" step="0.01" value="${val}"></td><td class="score-pct">${pct===null?"—":pct.toFixed(1)+"%"}</td><td>#${initialRankMap[s.id]}</td></tr>`;
   }).join("")||`<tr><td colspan="5" class="empty">Sin alumnos para este filtro.</td></tr>`;
   body.querySelectorAll(".score-input").forEach(inp=>inp.addEventListener("input",()=>{const n=Number(inp.value),max=Number(e.maxScore);inp.closest("tr").querySelector(".score-pct").textContent=inp.value===""?"—":Number.isFinite(n)?(n/max*100).toFixed(1)+"%":"—";evalCaptureDirty=true;updateEvalDirtyLabel();}));
   updateCaptureProgress();updateEvalDirtyLabel();
